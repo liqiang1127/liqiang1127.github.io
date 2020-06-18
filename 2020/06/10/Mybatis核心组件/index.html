@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Mybatis核心组件 | HDU_LIQIANG&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Mybatis操作数据下面一段使用Mybatis操作数据库的常见代码： 12345678910111213141516171819@Testpublic  void testMybatis () throws IOException &amp;#123;        &#x2F;&#x2F; 获取配置文件输入流        InputStream inputStream &#x3D; Resources.getResourceAs">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mybatis核心组件">
+<meta property="og:url" content="https://github.com/liqiang1127/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/index.html">
+<meta property="og:site_name" content="HDU_LIQIANG&#39;s Blog">
+<meta property="og:description" content="Mybatis操作数据下面一段使用Mybatis操作数据库的常见代码： 12345678910111213141516171819@Testpublic  void testMybatis () throws IOException &amp;#123;        &#x2F;&#x2F; 获取配置文件输入流        InputStream inputStream &#x3D; Resources.getResourceAs">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://github.com/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6.png">
+<meta property="article:published_time" content="2020-06-10T06:06:40.000Z">
+<meta property="article:modified_time" content="2020-06-10T06:58:37.793Z">
+<meta property="article:author" content="liqiang">
+<meta property="article:tag" content="Mybatis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6.png">
+  
+    <link rel="alternate" href="/atom.xml" title="HDU_LIQIANG&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">HDU_LIQIANG&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Java Coder</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://github.com/liqiang1127"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Mybatis核心组件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/" class="article-date">
+  <time datetime="2020-06-10T06:06:40.000Z" itemprop="datePublished">2020-06-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Mybatis核心组件
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="Mybatis操作数据"><a href="#Mybatis操作数据" class="headerlink" title="Mybatis操作数据"></a>Mybatis操作数据</h2><p>下面一段使用Mybatis操作数据库的常见代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span>  <span class="keyword">void</span> <span class="title">testMybatis</span> <span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">// 获取配置文件输入流</span></span><br><span class="line">        InputStream inputStream = Resources.getResourceAsStream(<span class="string">"mybatis-config.xml"</span>);</span><br><span class="line">        <span class="comment">// 通过SqlSessionFactoryBuilder的build()方法创建SqlSessionFactory实例</span></span><br><span class="line">        SqlSessionFactory sqlSessionFactory = <span class="keyword">new</span> SqlSessionFactoryBuilder().build(inputStream);</span><br><span class="line">        <span class="comment">// 调用openSession()方法创建SqlSession实例</span></span><br><span class="line">        SqlSession sqlSession = sqlSessionFactory.openSession();</span><br><span class="line">        <span class="comment">// 获取UserMapper代理对象</span></span><br><span class="line">        UserMapper userMapper = sqlSession.getMapper(UserMapper<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">        <span class="comment">// 执行Mapper方法，获取执行结果</span></span><br><span class="line">        List&lt;UserEntity&gt; userList = userMapper.listAllUser();</span><br><span class="line">         <span class="comment">/*</span></span><br><span class="line"><span class="comment">        // 兼容Ibatis，通过Mapper Id执行SQL操作</span></span><br><span class="line"><span class="comment">        List&lt;UserEntity&gt; userList = sqlSession.selectList(</span></span><br><span class="line"><span class="comment">                "com.blog4java.mybatis.com.blog4java.mybatis.example.mapper.UserMapper.listAllUser");</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">        System.out.println(JSON.toJSONString(userList));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上面的代码所示，<code>SqlSession</code>是<code>MyBatis</code>中提供与数据库交互的接口，<code>SqlSession</code>实例通过工厂模式创建。为了创建<code>SqlSession</code>对象，首先需要创建<code>SqlSessionFactory</code>对象，而<code>SqlSessionFactory</code>对象的创建依赖于<code>SqlSessionFactoryBuilder</code>类，该类提供了一系列重载的<code>build()</code>方法，我们需要以主配置文件的输入流作为参数调用<code>SqlSessionFactoryBuilder</code>的<code>build()</code>方法，以获取一个<code>SqlSessionFactory</code>对象。调用<code>SqlSessionFactory</code>对象的<code>openSession()</code>获取一个与数据库建立连接的<code>SqlSession</code>实例。然后调用<code>getMapper()</code>方法获取一个动态代理对象，然后通过代理实例的方法，完成与数据库的交互。</p>
+<h2 id="Mybatis核心组件"><a href="#Mybatis核心组件" class="headerlink" title="Mybatis核心组件"></a>Mybatis核心组件</h2><p>上面接触Mybatis比较核心的一个组件<code>SqlSession</code>，它是Mybatis提供给用户操作数据库的API，那么MyBatis底层又是如何工作的呢？我准备了一张图，这里画出了Mybatis中一些比较核心的组件。</p>
+<img src="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6.png" class title="核心组件">
+
+<p>下面简单介绍这些核心组件：</p>
+<ul>
+<li><strong>Configuration</strong>：用户描述Mybatis的主配置信息，其他组件需要获取配置信息时，直接通过Configuration对象获取。除此以外，MyBatis在应用启动时，将Mapper配置信息，类型别名，TypeHandler等注册到Configuration组件中，其他组件需要的时候可以获取。</li>
+<li><strong>MappedStatement</strong>：MappedStatement用于描述Mapper中的Sql配置信息，是对Mapper XML配置文件中&lt;select|update|delete|insert&gt;等标签或者@Select/@Update等注解配置信息的封装。</li>
+<li><strong>SqlSession</strong>:SqlSession是MyBatis提供的面向用户API，表示和数据库交互式的会话对象，用于完成数据库的增删改查功能。SqlSession是Executor组件的外观，目的是对外提供易于理解和使用的数据库操作接口。</li>
+<li><strong>Executor</strong>：Executor是MyBatis的Sql执行器，MyBatis中对数据库所有的增删改查操作都是由Executor组件完成的。</li>
+<li><strong>StatementHandler</strong>：StatementHandler封装了对JDBC Statement的操作，比如为Statement对象设置参数，调用Statement接口提供的方法与数据库交互等。</li>
+<li><strong>ParameterHandler</strong>：当MyBatis框架使用的Statement类型为PrepareStatement或CallableStatement时，ParameterHandler用于为Statement对象参数占位符设置值。</li>
+<li><strong>ResultSetHandler</strong>：ResultSetHandler封装了对JDBC ResultSet对象的操作。用以返回Select语句查询到的Java对象。</li>
+<li><strong>TypeHandler</strong>：TypeHandler完成getXXX和setXXX时的类型转换，完成数据库类型和Java类型的映射（或者反之）。</li>
+</ul>
+<h2 id="工作关键点"><a href="#工作关键点" class="headerlink" title="工作关键点"></a>工作关键点</h2><p>了解了Mybatis的核心组件以后，我们再简单分析一下数据库交互的关键点：</p>
+<ol>
+<li>获取<code>SqlSession</code>组件（获取这个过程第一节讲过了），它实际上是<code>Executor</code>组件的外观，提供给用户更加易用友好的接口，体现了设计模式的<strong>外观模式</strong>。</li>
+<li>真正执行SQL操作的是<code>Executor</code>组件，可以理解它为执行器。</li>
+<li><code>Executor</code>会使用<code>StatementHandler</code>组件对JDBC的<code>Statement</code>对象进行操作。如果<code>Statement</code>的类型是<code>PrepareStatement</code>或者<code>CallableStatement</code>，则会通过<code>ParameterHandler</code>为参数占位符进行赋值。</li>
+<li><code>ParameterHandler</code>赋值的时候会找到Java类型对应的<code>TypeHandler</code>对象，<code>TypeHandler</code>会调用<code>Statement</code>对象提供的setXXX()方法对参数占位符设置值。</li>
+<li><code>StatementHandler</code>使用JDBC的<code>Statement</code>对象与数据库完成交互以后，当执行的SQL为select，<code>ResultSetHandler</code>组件会从<code>Statement</code>对象中获取<code>ResultSet</code>对象它转换成Java对象，返回给上层。</li>
+</ol>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>接下来就是各个组件的具体解析，以后有机会再写。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/" data-id="ckb905ao70000okug636l2j65" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          ConcurrentHashMap和HashTable
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/06/09/HashMap/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">HashMap</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/">ConcurrentHashMap和HashTable</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/09/HashMap/">HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/">Mysql和Redis双写一致性</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 liqiang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

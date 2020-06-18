@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>JVM常用监控命令&amp;工具 | HDU_LIQIANG&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="工欲善其事必先利其器，JDK给我们提供了许多功能强大的监控命令和工具，帮助我们了解JVM内部发生了什么。 这篇博客不说理论，用一个例子使用常见的指令和工具 我们在IDEA中跑这么一个死循环，为了看到GC的情况，使用如下虚拟机参数  -Xmx10m -Xms10m   -Xms10m 初始堆的大小10m -Xmx10m 最大堆的大小10m   12345678class Solution &amp;#123">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM常用监控命令&amp;工具">
+<meta property="og:url" content="https://github.com/liqiang1127/2020/04/22/JVM-TOOLS/index.html">
+<meta property="og:site_name" content="HDU_LIQIANG&#39;s Blog">
+<meta property="og:description" content="工欲善其事必先利其器，JDK给我们提供了许多功能强大的监控命令和工具，帮助我们了解JVM内部发生了什么。 这篇博客不说理论，用一个例子使用常见的指令和工具 我们在IDEA中跑这么一个死循环，为了看到GC的情况，使用如下虚拟机参数  -Xmx10m -Xms10m   -Xms10m 初始堆的大小10m -Xmx10m 最大堆的大小10m   12345678class Solution &amp;#123">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/jps.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/jstat.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/jstack.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/Inkedmian_LI.jpg">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/dump.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/jmap_heap.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/jconsole.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/mem.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/jvisualvm1.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/jvisualvm2.png">
+<meta property="og:image" content="https://github.com/2020/04/22/JVM-TOOLS/jvisualvm3.png">
+<meta property="article:published_time" content="2020-04-22T13:10:28.000Z">
+<meta property="article:modified_time" content="2020-05-28T08:28:17.654Z">
+<meta property="article:author" content="liqiang">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2020/04/22/JVM-TOOLS/jps.png">
+  
+    <link rel="alternate" href="/atom.xml" title="HDU_LIQIANG&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">HDU_LIQIANG&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Java Coder</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://github.com/liqiang1127"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-JVM-TOOLS" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/04/22/JVM-TOOLS/" class="article-date">
+  <time datetime="2020-04-22T13:10:28.000Z" itemprop="datePublished">2020-04-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      JVM常用监控命令&amp;工具
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>工欲善其事必先利其器，JDK给我们提供了许多功能强大的监控命令和工具，帮助我们了解JVM内部发生了什么。</p>
+<p>这篇博客不说理论，用一个例子使用常见的指令和工具</p>
+<p>我们在IDEA中跑这么一个死循环，为了看到GC的情况，使用如下虚拟机参数</p>
+<blockquote>
+<p>-Xmx10m -Xms10m</p>
+</blockquote>
+<ul>
+<li>-Xms10m 初始堆的大小10m</li>
+<li>-Xmx10m 最大堆的大小10m </li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>)&#123;</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">            System.out.println(<span class="string">"123"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="命令行工具"><a href="#命令行工具" class="headerlink" title="命令行工具"></a>命令行工具</h1><h2 id="jps"><a href="#jps" class="headerlink" title="jps"></a>jps</h2><p><strong>jps</strong>的作用是显示JVM当前运行的Java进程。-l 的作用是显示类的全名。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jps -l</span><br></pre></td></tr></table></figure>
+
+<img src="/2020/04/22/JVM-TOOLS/jps.png" class title="jps">
+
+<p>可以看到我们刚刚运行的程序，在JVM中的进程(com.example.demo.Solution)的pid是<strong>1248</strong>。</p>
+<h2 id="jstat"><a href="#jstat" class="headerlink" title="jstat"></a>jstat</h2><p>刚刚看到了我们运行的进程的id是<strong>1248</strong>，现在我们就可以用<strong>jstat</strong>来查看当前堆内存使用情况和<strong>GC</strong>的一些信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcutil 1248 2000</span><br></pre></td></tr></table></figure>
+
+<img src="/2020/04/22/JVM-TOOLS/jstat.png" class title="jstat">
+
+<p>其中<strong>gcutil</strong>是我最常用的指令，后面<strong>1248</strong>就是我们通过<strong>jps</strong>查到的pid，2000代表打印周期为2000ms。</p>
+<h3 id="参数解释"><a href="#参数解释" class="headerlink" title="参数解释"></a>参数解释</h3><table>
+<thead>
+<tr>
+<th>名称</th>
+<th>意义</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S0</td>
+<td>存活区0</td>
+<td>年轻代的区域之一</td>
+</tr>
+<tr>
+<td>S1</td>
+<td>存活区1</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Eden区</td>
+<td>new出来的Java对象一般放在这里，它和S0,S1构成年轻代</td>
+</tr>
+<tr>
+<td>O</td>
+<td>Old区</td>
+<td>老年代，存放大对象和生命周期比较长的对象</td>
+</tr>
+<tr>
+<td>M</td>
+<td>Matespace</td>
+<td>元空间</td>
+</tr>
+<tr>
+<td>CCS</td>
+<td>Compressed Class Space</td>
+<td>压缩类空间</td>
+</tr>
+<tr>
+<td>YGC</td>
+<td>yangGC</td>
+<td>年轻代的GC次数</td>
+</tr>
+<tr>
+<td>YGCT</td>
+<td>YGCTime</td>
+<td>年轻代的GC的耗时</td>
+</tr>
+<tr>
+<td>FGC</td>
+<td>fullGC</td>
+<td>完全GC的次数</td>
+</tr>
+<tr>
+<td>FGCT</td>
+<td>fullGCTime</td>
+<td>完全GC的耗时</td>
+</tr>
+<tr>
+<td>GCT</td>
+<td>GCTime</td>
+<td>CG的总耗时</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>注意：表示空间大小的都是百分比</p>
+</blockquote>
+<h2 id="jstack"><a href="#jstack" class="headerlink" title="jstack"></a>jstack</h2><p>刚刚看了一下堆内存的使用情况和GC的情况，下面再来看一下我们进程中线程的情况。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstack 1248</span><br></pre></td></tr></table></figure>
+
+<img src="/2020/04/22/JVM-TOOLS/jstack.png" class title="jstack">
+
+
+<p>往下翻翻可以看到我们的<code>main</code>线程的状态：</p>
+<img src="/2020/04/22/JVM-TOOLS/Inkedmian_LI.jpg" class title="main">
+
+
+<p>可以看到，<code>main</code>线程由于调用了<code>Thread.sleep</code>方法而进入了<code>TIME_WAITING</code>状态，没毛病，和我们的代码吻合。</p>
+<h2 id="jmap"><a href="#jmap" class="headerlink" title="jmap"></a>jmap</h2><h3 id="用法1"><a href="#用法1" class="headerlink" title="用法1"></a>用法1</h3><p>jmap一般用来把服务器当前内存的状态<strong>dump</strong>出一个文件，然后把文件下载到本地，用其他工具(后面会介绍工具)来可视化分析。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmap -dump:file=abc 1248</span><br></pre></td></tr></table></figure>
+
+<p>很简单，系统会提示你已经file created</p>
+<img src="/2020/04/22/JVM-TOOLS/dump.png" class title="dump">
+
+<h3 id="用法2"><a href="#用法2" class="headerlink" title="用法2"></a>用法2</h3><p>jmap也可以在控制台打印输出，使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmap -heap 1248</span><br></pre></td></tr></table></figure>
+
+<img src="/2020/04/22/JVM-TOOLS/jmap_heap.png" class title="jmap_heap">
+
+<p>这打印的东西就有点复杂了，其实不然，仔细看一下的话其实也很简单，和<code>jstat -gcutil</code>的前半部分类似，主要就是展现了堆内存使用的一些情况，不过这里更加详细，读起来也比较容易。</p>
+<h1 id="介绍两个图形化工具"><a href="#介绍两个图形化工具" class="headerlink" title="介绍两个图形化工具"></a>介绍两个图形化工具</h1><p>命令行都是文字，肯定没有图形直观，易读，接下来就介绍2个图形化的工具。</p>
+<h2 id="jconsole"><a href="#jconsole" class="headerlink" title="jconsole"></a>jconsole</h2><p>在cmd中输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jconsole</span><br></pre></td></tr></table></figure>
+<p>就会弹出软件的界面</p>
+<img src="/2020/04/22/JVM-TOOLS/jconsole.png" class title="jconsole">
+
+<p>我们选择实验的Solution类，连接进去，就可以看到软件的界面。</p>
+
+
+<p>它可以看</p>
+<ul>
+<li><p>内存使用情况</p>
+</li>
+<li><p>线程情况</p>
+</li>
+<li><p>类加载情况</p>
+</li>
+<li><p>VM的概要</p>
+</li>
+</ul>
+<p>我们这里简单看一下内存使用的情况。</p>
+<img src="/2020/04/22/JVM-TOOLS/mem.png" class title="内存使用">
+
+<p>很好很强大！</p>
+<h2 id="jvisualvm"><a href="#jvisualvm" class="headerlink" title="jvisualvm"></a>jvisualvm</h2><p>这是好像是oracle JDK独有的工具？不知道openJDK有没有。直译过来就是可视化虚拟机，功能很强大。也是控制台输入<strong>jvisualvm</strong>直接打开。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jvisualvm</span><br></pre></td></tr></table></figure>
+<img src="/2020/04/22/JVM-TOOLS/jvisualvm1.png" class title="jvisualvm">
+
+
+<p>这个工具的功能其实和上面的<strong>jconsole</strong>有点类似，不过它可以用来看我们之前用<code>jmap -dump:file=abc xxx</code>dump下来的文件。</p>
+<img src="/2020/04/22/JVM-TOOLS/jvisualvm2.png" class title="jvisualvm">
+
+<p>选择我们之前导出的文件，就可以分析它了。</p>
+<img src="/2020/04/22/JVM-TOOLS/jvisualvm3.png" class title="jvisualvm">
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>今天介绍了一下，jvm管理中常用的一些指令和工具，客观介绍为主。具体怎么结合实际去定位发现错误，还得看个人水平。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/04/22/JVM-TOOLS/" data-id="ck9qswfqb000j2cug5hvthd49" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/04/23/Linux%E8%AE%BE%E7%BD%AE%E6%97%B6%E9%97%B4/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Linux设置时间
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/04/21/select%E5%90%8E%E9%9D%A2%E6%8B%AC%E5%8F%B7%E4%B8%AD2%E7%9A%84%E5%90%AB%E4%B9%89/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">select后面括号中2的含义</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/">ConcurrentHashMap和HashTable</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/09/HashMap/">HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/">Mysql和Redis双写一致性</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 liqiang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>同步与异步and阻塞与非阻塞 | HDU_LIQIANG&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1.同步与异步所谓的同步就是一个任务的完成需要依赖另一个任务时，只有等待被依赖的任务完成后，所依赖的任务才能完成，这是一种可靠的任务序列。要成功都成功，要失败都失败，两个任务的状态可以保持一致。而异步不需要等待被依赖的任务完成，只是通知被依赖的任务要完成什么工作，依赖的任务也立即执行，只要自己完成了整个任务就算完成了。至于被依赖的任务最终是否真正完成，依赖它的任务无法确定，所以他是不可靠的任务序列">
+<meta property="og:type" content="article">
+<meta property="og:title" content="同步与异步and阻塞与非阻塞">
+<meta property="og:url" content="https://github.com/liqiang1127/2020/05/27/%E5%90%8C%E6%AD%A5%E4%B8%8E%E5%BC%82%E6%AD%A5and%E9%98%BB%E5%A1%9E%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E/index.html">
+<meta property="og:site_name" content="HDU_LIQIANG&#39;s Blog">
+<meta property="og:description" content="1.同步与异步所谓的同步就是一个任务的完成需要依赖另一个任务时，只有等待被依赖的任务完成后，所依赖的任务才能完成，这是一种可靠的任务序列。要成功都成功，要失败都失败，两个任务的状态可以保持一致。而异步不需要等待被依赖的任务完成，只是通知被依赖的任务要完成什么工作，依赖的任务也立即执行，只要自己完成了整个任务就算完成了。至于被依赖的任务最终是否真正完成，依赖它的任务无法确定，所以他是不可靠的任务序列">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-05-27T13:33:00.000Z">
+<meta property="article:modified_time" content="2020-05-28T08:33:52.153Z">
+<meta property="article:author" content="liqiang">
+<meta property="article:tag" content="网络通信">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="HDU_LIQIANG&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">HDU_LIQIANG&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Java Coder</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://github.com/liqiang1127"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-同步与异步and阻塞与非阻塞" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/05/27/%E5%90%8C%E6%AD%A5%E4%B8%8E%E5%BC%82%E6%AD%A5and%E9%98%BB%E5%A1%9E%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E/" class="article-date">
+  <time datetime="2020-05-27T13:33:00.000Z" itemprop="datePublished">2020-05-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      同步与异步and阻塞与非阻塞
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="1-同步与异步"><a href="#1-同步与异步" class="headerlink" title="1.同步与异步"></a>1.同步与异步</h2><p>所谓的<strong>同步</strong>就是一个任务的完成需要依赖另一个任务时，只有等待被依赖的任务完成后，所依赖的任务才能完成，这是一种<strong>可靠的任务序列</strong>。要成功都成功，要失败都失败，两个任务的状态可以保持一致。而<strong>异步</strong>不需要等待被依赖的任务完成，只是通知被依赖的任务要完成什么工作，依赖的任务也立即执行，只要自己完成了整个任务就算完成了。至于被依赖的任务最终是否真正完成，依赖它的任务无法确定，所以他是不可靠的任务序列。<strong>我们可以用打电话和发短信来很好的比喻同步与异步的操作。</strong></p>
+<p>在涉及I/O处理时通常都会遇到是同步还是异步的处理方式的选择问题，因为同步与异步的I/O处理方式对调用者的影响很大，在数据库产品中都会遇到这个问题，因为I/O通常是一个非常耗时的操作，在一个任务序列中，I/O通常都是性能的瓶颈。但是同步与异步的处理方式对于可靠性的影响非常大，<strong>同步能够保证程序的可靠性，而异步可以提升程序的性能</strong>，必须在可靠性和性能之间保持平衡，去没有完美的解决方案。</p>
+<h2 id="2-阻塞与非阻塞"><a href="#2-阻塞与非阻塞" class="headerlink" title="2.阻塞与非阻塞"></a>2.阻塞与非阻塞</h2><p>阻塞与非阻塞主要是从CPU的消耗上来说的，阻塞就是CPU停下来等待一个慢的操作完成以后，CPU才能继续完成其他工作。非阻塞就是在这个慢操作执行的过程中，CPU去完成其他工作，等这个慢操作完成时，CPU在接着完成后续的操作。虽然从表面上看，非阻塞的方式可以明显提高CPU的利用率，但是也带来另一种后果，就是系统线程切换的增加。增加的CPU使用时间能不能步长系统切换成本需要好好评估。</p>
+<h2 id="3-两种方式的组合"><a href="#3-两种方式的组合" class="headerlink" title="3. 两种方式的组合"></a>3. 两种方式的组合</h2><table>
+<thead>
+<tr>
+<th>组合方式<div style="width: 150pt"></div></th>
+<th>性能分析</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同步阻塞</td>
+<td>最常用的一种方法，也是最简单的，但是IO性能很一般，CPU大部分时间处于空闲状态。</td>
+</tr>
+<tr>
+<td>同步非阻塞</td>
+<td>提升IO性能的常用手段，就是将IO的阻塞改成非阻塞的方式，尤其是网络IO是长连接同时传输数据也不是很多啊的情况下，提升性能非常有效。<br>这种方式通常提升IO性能但是增加CPU的消耗，要考虑增加的IO性能能不能补偿CPU的消耗，也就是系统的瓶颈是在IO上还是CPU上。</td>
+</tr>
+<tr>
+<td>异步阻塞</td>
+<td>这种方式在分布式数据库中经常用到，例如，在一个分布式数据库中写一条记录，通常会有一份是同步阻塞的记录，还有2~3份备份记录到其他机器上，这些备份记录通常采用的异步阻塞的方式写IO。<br>异步阻塞对网络IO能够提升效率，尤其是像上面这种同时写多份相同数据的情况下。</td>
+</tr>
+<tr>
+<td>异步非阻塞</td>
+<td>这种组合方式用起来比较复杂，只有在一些非常复杂的分布式情况下使用，集群之间的消息同步机制一般用这种IO组合方式。如Cassandra的Gossip通信机制就是采用异步非阻塞的方式。<br>它适合同时要传多份相同的数据到集群的不同的机器，同时数据的传输量虽然不大却非常频繁的情况。这种网络IO方式性能能达到最高。</td>
+</tr>
+</tbody></table>
+<p>虽然异步和非阻塞能够提升IO的性能，但是也会带来一些额外的性能成本，例如，会增加线程数量从而增加CPU的消耗，同时也会使程序设计的复杂度的上升。如果设计得不合理反而会导致性能下降，在实际设计时要根据场景综合评估。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/05/27/%E5%90%8C%E6%AD%A5%E4%B8%8E%E5%BC%82%E6%AD%A5and%E9%98%BB%E5%A1%9E%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E/" data-id="ckapf2vvz0000xcugfs3rfc1g" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/05/28/%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          适配器模式、装饰者模式和代理模式
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">JVM垃圾收集器</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/">ConcurrentHashMap和HashTable</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/09/HashMap/">HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/">Mysql和Redis双写一致性</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 liqiang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

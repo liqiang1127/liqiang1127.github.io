@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>设计模式-单例模式 | HDU_LIQIANG&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="单例设计模式（面试重点）1.概念：单例对象的类必须保证只有一个实例存在2.使用场景：单例模式中，一个类只允许创建一个对象，这样做能够节省内存，加快对象访问速度，常用在以下场景：  需要频繁实例化然后销毁的对象  创建对象耗时或者消耗资源过多，但是又经常用到的对象。  需要维护全局状态的对象。  频繁访问数据库或文件的对象。   比如，大名鼎鼎的Spring的bean就是单例的，在Applicati">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式-单例模式">
+<meta property="og:url" content="https://github.com/liqiang1127/2020/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="HDU_LIQIANG&#39;s Blog">
+<meta property="og:description" content="单例设计模式（面试重点）1.概念：单例对象的类必须保证只有一个实例存在2.使用场景：单例模式中，一个类只允许创建一个对象，这样做能够节省内存，加快对象访问速度，常用在以下场景：  需要频繁实例化然后销毁的对象  创建对象耗时或者消耗资源过多，但是又经常用到的对象。  需要维护全局状态的对象。  频繁访问数据库或文件的对象。   比如，大名鼎鼎的Spring的bean就是单例的，在Applicati">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-03-14T06:13:08.000Z">
+<meta property="article:modified_time" content="2020-05-28T08:31:28.765Z">
+<meta property="article:author" content="liqiang">
+<meta property="article:tag" content="设计模式">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="HDU_LIQIANG&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">HDU_LIQIANG&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Java Coder</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://github.com/liqiang1127"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-设计模式-单例模式" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" class="article-date">
+  <time datetime="2020-03-14T06:13:08.000Z" itemprop="datePublished">2020-03-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      设计模式-单例模式
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="单例设计模式（面试重点）"><a href="#单例设计模式（面试重点）" class="headerlink" title="单例设计模式（面试重点）"></a>单例设计模式（面试重点）</h2><h3 id="1-概念：单例对象的类必须保证只有一个实例存在"><a href="#1-概念：单例对象的类必须保证只有一个实例存在" class="headerlink" title="1.概念：单例对象的类必须保证只有一个实例存在"></a>1.概念：单例对象的类必须保证只有一个实例存在</h3><h3 id="2-使用场景："><a href="#2-使用场景：" class="headerlink" title="2.使用场景："></a>2.使用场景：</h3><p>单例模式中，一个类只允许创建一个对象，这样做能够节省内存，加快对象访问速度，常用在以下场景：</p>
+<ol>
+<li><p>需要频繁实例化然后销毁的对象</p>
+</li>
+<li><p>创建对象耗时或者消耗资源过多，但是又经常用到的对象。</p>
+</li>
+<li><p>需要维护全局状态的对象。</p>
+</li>
+<li><p>频繁访问数据库或文件的对象。</p>
+</li>
+</ol>
+<p>比如，大名鼎鼎的<strong>Spring</strong>的bean就是单例的，在ApplicationContext中，bean就是启动的时候默认创建，然后注入的。</p>
+<h3 id="3-常见写法"><a href="#3-常见写法" class="headerlink" title="3.常见写法"></a>3.常见写法</h3><ol>
+<li>饿汉式：饿汉（一个很饥饿的人进了饭店）顾名思义就是上来就要（创建）。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 优点：简单，没有线程安全的问题</span></span><br><span class="line"><span class="comment">     * 缺点：万一这个类没有被使用，那么就等于说浪费资源。其次，系统启动的时候，会自动创建也会耗时。</span></span><br><span class="line"><span class="comment">     **/</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>懒汉式：懒汉，能不做就不做。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * 优点：线程安全，延迟加载(Effective Java推荐写法)</span></span><br><span class="line"><span class="comment">    **/</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Holder.SINGLE_TON;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Holder</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton SINGLE_TON = <span class="keyword">new</span> Singleton();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的写法利用到了类加载的性质，当内部类(HOLDER)首次使用的时候，会被虚拟机加载，由虚拟机创建Singleton的实例，<strong>保证了线程安全</strong>。</p>
+<ol start="3">
+<li>双重检查锁(double checked locking)</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> Singleton instance;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Single <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">null</span> == instance)&#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton<span class="class">.<span class="keyword">class</span>)</span>&#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="keyword">null</span> == instance)</span><br><span class="line">                    instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如何理解双重检查锁？</p>
+<ol>
+<li><p>双重检查指的是两次检查<code>null</code>, 锁指的是<code>synchronized</code>锁当前的类对象。</p>
+</li>
+<li><p>为什么要搞的这么复杂？这就要从整个过程去理解了。</p>
+<ol>
+<li><p>第一次检查<code>null</code>，这个很好理解，如果当前的<code>instance</code>已经创建了，那么直接返回。</p>
+</li>
+<li><p>如果没创建，那么必然需要创建一个<code>instance</code>。此时加锁避免了多线程情况下的线程安全问题。比如，两个线程都判断当前<code>instance</code>为<code>null</code>，那么肯定只能允许一个线程去创建，此时通过加锁去实现。</p>
+</li>
+<li><p>第二次检查<code>null</code>又是为什么呢？大家可以想象一下下面这个情况。首先，看下正常情况下：</p>
+<table>
+<thead>
+<tr>
+<th>时间点</th>
+<th>线程A</th>
+<th>线程B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>第一次判断null成功</td>
+<td>没启动</td>
+</tr>
+<tr>
+<td>2</td>
+<td>获取锁成功</td>
+<td>没启动</td>
+</tr>
+<tr>
+<td>3</td>
+<td>第二次判断null成功</td>
+<td>没启动</td>
+</tr>
+<tr>
+<td>4</td>
+<td>创建instance</td>
+<td>第一次判断null成功(此时线程A正在创建对象)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>创建成功并释放锁</td>
+<td>获取锁成功</td>
+</tr>
+<tr>
+<td>6</td>
+<td>返回instance</td>
+<td>第二次判断null失败</td>
+</tr>
+<tr>
+<td>7</td>
+<td>已经结束</td>
+<td>返回线程A创建的intance</td>
+</tr>
+</tbody></table>
+<p> <strong>如果此时没有第二次null判断的话，会是下面这种情况</strong></p>
+<table>
+<thead>
+<tr>
+<th>时间点</th>
+<th>线程A</th>
+<th>线程B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>判断null成功</td>
+<td>没启动</td>
+</tr>
+<tr>
+<td>2</td>
+<td>获取锁成功</td>
+<td>没启动</td>
+</tr>
+<tr>
+<td>3</td>
+<td>创建instance</td>
+<td>判断null成功(此时线程A正在创建对象)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>创建成功并释放锁</td>
+<td>获取锁成功</td>
+</tr>
+<tr>
+<td>5</td>
+<td>返回instance</td>
+<td>创建instance</td>
+</tr>
+<tr>
+<td>6</td>
+<td>已经结束</td>
+<td>返回instance</td>
+</tr>
+</tbody></table>
+<p> 这样就<strong>创建了2个instance</strong>,出现线程安全问题</p>
+</li>
+<li><p>当然，双重检查锁还有一个比较关键的点就是<code>volatile</code>，它用来保证内存可见性，比较重要，值得独立开一篇来讲。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="4-Spring中的单例"><a href="#4-Spring中的单例" class="headerlink" title="4. Spring中的单例"></a>4. Spring中的单例</h3><p>这部分还是写到Spring的时候再写吧。</p>
+<h3 id="5-总结一下"><a href="#5-总结一下" class="headerlink" title="5. 总结一下"></a>5. 总结一下</h3><ul>
+<li>这篇博客，重点是介绍了一下单例模式，为啥第一个介绍它呢？当然是面试常问啊，面向面试的编程嘛~</li>
+<li>主要介绍了单例模式的三种写法和自己的一些分析。有些拓展内容，比如<code>volatile</code>、<code>synchronized</code>和<strong>Spring</strong>以后独立博客再写。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/03/14/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F-%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/" data-id="ck9qswfqr00222cug3b4zhrqi" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/03/15/LeetCode%E5%BF%85%E5%88%B7%E9%A2%98/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          LeetCode必刷题
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">JVM运行时数据区</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/">ConcurrentHashMap和HashTable</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/09/HashMap/">HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/">Mysql和Redis双写一致性</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 liqiang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

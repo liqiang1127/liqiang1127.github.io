@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>mysql中3层的B+树能存多少条数据？ | HDU_LIQIANG&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="InnoDB一棵B+树可以存放多少行数据？这个问题的简单回答是：约2千万。为什么是这么多呢？因为这是可以算出来的，要搞清楚这个问题，我们先从InnoDB索引数据结构、数据组织方式说起。 在计算机中磁盘存储数据最小单元是扇区，一个扇区的大小是512字节，而文件系统（例如XFS&#x2F;EXT4）他的最小单元是块，一个块的大小是4k，而对于我们的InnoDB存储引擎也有自己的最小储存单元——页（Page），一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql中3层的B+树能存多少条数据？">
+<meta property="og:url" content="https://github.com/liqiang1127/2020/06/17/b-treeContains/index.html">
+<meta property="og:site_name" content="HDU_LIQIANG&#39;s Blog">
+<meta property="og:description" content="InnoDB一棵B+树可以存放多少行数据？这个问题的简单回答是：约2千万。为什么是这么多呢？因为这是可以算出来的，要搞清楚这个问题，我们先从InnoDB索引数据结构、数据组织方式说起。 在计算机中磁盘存储数据最小单元是扇区，一个扇区的大小是512字节，而文件系统（例如XFS&#x2F;EXT4）他的最小单元是块，一个块的大小是4k，而对于我们的InnoDB存储引擎也有自己的最小储存单元——页（Page），一">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://github.com/2020/06/17/b-treeContains/pic1.png">
+<meta property="og:image" content="https://github.com/2020/06/17/b-treeContains/pic2.png">
+<meta property="og:image" content="https://github.com/2020/06/17/b-treeContains/pic3.png">
+<meta property="article:published_time" content="2020-06-17T09:29:11.000Z">
+<meta property="article:modified_time" content="2020-06-17T09:34:18.607Z">
+<meta property="article:author" content="liqiang">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2020/06/17/b-treeContains/pic1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="HDU_LIQIANG&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">HDU_LIQIANG&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Java Coder</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://github.com/liqiang1127"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-b-treeContains" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/06/17/b-treeContains/" class="article-date">
+  <time datetime="2020-06-17T09:29:11.000Z" itemprop="datePublished">2020-06-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      mysql中3层的B+树能存多少条数据？
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><code>InnoDB一棵B+树可以存放多少行数据？</code>这个问题的简单回答是：<code>约2千万</code>。为什么是这么多呢？因为这是可以算出来的，要搞清楚这个问题，我们先从InnoDB索引数据结构、数据组织方式说起。</p>
+<p>在计算机中<code>磁盘</code>存储数据最小单元是<code>扇区</code>，一个扇区的大小是<code>512字节</code>，而<code>文件系统</code>（例如XFS/EXT4）他的最小单元是<code>块</code>，一个块的大小是<code>4k</code>，而对于我们的<code>InnoDB存储引擎</code>也有自己的最小储存单元——<code>页（Page）</code>，一个页的大小是<code>16K</code>。</p>
+<p><strong>下面几张图可以帮你理解最小存储单元：</strong><br>文件系统中一个文件大小<code>只有1个字节</code>，但<code>不得不占磁盘上4KB的空间</code>。</p>
+<img src="/2020/06/17/b-treeContains/pic1.png" class title="ss">
+
+<p>innodb的所有数据文件（后缀为ibd的文件），他的大小始终都是<code>16384（16k）</code>的整数倍。<br>磁盘扇区、文件系统、InnoDB存储引擎都有各自的最小存储单元。在MySQL中我们的InnoDB页的大小默认是16k，<code>当然也可以通过参数设置</code>。</p>
+<img src="/2020/06/17/b-treeContains/pic2.png" class title="ss">
+
+<p>数据表中的数据都是存储在页中的，所以一个页中能存储多少行数据呢？<code>假设一行数据的大小是1k</code>，那么<code>一个页可以存放16行这样的数据</code>。</p>
+<p>如果数据库只按这样的方式存储，那么如何查找数据就成为一个问题，因为我们不知道要查找的数据存在哪个页中，也不可能把所有的页遍历一遍，那样太慢了。所以人们想了一个办法，<code>用B+树的方式组织这些数据</code>。如图所示：</p>
+<img src="/2020/06/17/b-treeContains/pic3.png" class title="ss">
+
+<p>据记录按主键进行排序，分别存放在不同的页中（为了便于理解我们这里一个页中只存放3条记录，实际情况可以存放很多），除了存放<code>数据</code>的页以外，还有存放<code>键值+指针</code>的页，如图中<code>page number=3的页</code>，该页存放键值和指向数据页的指针，这样的页由N个键值+指针组成。当然它也是<code>排好序的</code>。这样的数据组织形式，我们称为索引组织表。现在来看下，要查找一条数据，怎么查？</p>
+<p>比如执行如下语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">5</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这里id是主键,我们通过这棵B+树来查找，首先找到根页，你怎么知道user表的根页在哪呢？其实每张表的根页位置在表空间文件中是固定的，即page number=3的页（这点我们下文还会进一步证明），找到根页后，通过<code>二分查找法</code>，定位到id=5的数据应该在指针P5指向的页中，那么进一步去page number=5的页中查找，同<code>样通过二分查询法</code>即可找到id=5的记录。</p>
+<p><strong>现在我们清楚了InnoDB中主键索引B+树是如何组织数据、查询数据的，我们<code>总结一下</code>：</strong></p>
+<p>1、InnoDB存储引擎的<code>最小存储单元是页</code>，页可以用于存放<code>数据</code>也可以用于存放<code>键值+指针</code>，在B+树中叶子节点存放数据，非叶子节点存放键值+指针。</p>
+<p>2、索引组织表通过非叶子节点的<code>二分查找法</code>以及指针确定数据在哪个页中，进而在去数据页中查找到需要的数据；</p>
+<p><strong>那么回到我们开始的问题，<code>通常一棵B+树可以存放多少行数据？</code></strong></p>
+<p>这里我们<code>先假设B+树高为2</code>，即存在一个根节点和若干个叶子节点，那么这棵B+树的存放总记录数为：根节点指针数*单个叶子节点记录行数。</p>
+<p>上文我们已经说明单个叶子节点（页）中的记录数=16K/1K=16。（这里假设一行记录的数据大小为1k，<code>实际上</code>现在很多互联网业务<code>数据记录大小通常就是1K左右</code>）。</p>
+<p>那么现在我们需要计算出<code>非叶子节点能存放多少指针</code>，其实这也很好算，我们假设<code>主键ID为bigint类型，长度为8字节</code>，而<code>指针大小</code>在InnoDB源码中设置为<code>6字节</code>，这样一共14字节，我们一个页中能存放多少这样的单元，其实就代表有多少指针，即<code>16384/14=1170</code>。那么可以算出一棵<code>高度为2的B+树</code>，能存放<code>1170*16=18720条</code>这样的数据记录。</p>
+<p>根据同样的原理我们可以算出一个<code>高度为3的B+树</code>可以存放：<code>1170*1170*16=21902400条</code>这样的记录。所以在InnoDB中<code>B+树高度一般为1-3层</code>，它就能<code>满足千万级的数据存储</code>。在查找数据时 <strong><code>一次页的查找代表一次IO</code></strong>， 所以通过主键索引查询通常 <strong><code>只需要1-3次IO操作</code></strong> 即可查找到数据。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/06/17/b-treeContains/" data-id="ckbj5svic0000jsug3sdq0opn" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">ConcurrentHashMap和HashTable</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/">ConcurrentHashMap和HashTable</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/09/HashMap/">HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/">Mysql和Redis双写一致性</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 liqiang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

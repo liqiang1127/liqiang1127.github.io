@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>HashMap | HDU_LIQIANG&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="HashMap总结（问答）  好了我们开始今天的面试吧，小伙子你了解数据结构中的HashMap么？能跟我聊聊他的结构和底层原理么？  嗯嗯面试官，我知道HashMap是我们非常常用的数据结构，由数组和链表组合构成的数据结构。 大概如下，数组里面每个地方都存了Key-Value这样的实例，在Java7叫Entry在Java8中叫Node。   因为他本身所有的位置都为null，在put插入的时候会根">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HashMap">
+<meta property="og:url" content="https://github.com/liqiang1127/2020/06/09/HashMap/index.html">
+<meta property="og:site_name" content="HDU_LIQIANG&#39;s Blog">
+<meta property="og:description" content="HashMap总结（问答）  好了我们开始今天的面试吧，小伙子你了解数据结构中的HashMap么？能跟我聊聊他的结构和底层原理么？  嗯嗯面试官，我知道HashMap是我们非常常用的数据结构，由数组和链表组合构成的数据结构。 大概如下，数组里面每个地方都存了Key-Value这样的实例，在Java7叫Entry在Java8中叫Node。   因为他本身所有的位置都为null，在put插入的时候会根">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p1.png">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p2.png">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p3.png">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p4.png">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p5.png">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p6.png">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p7.png">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p8.png">
+<meta property="og:image" content="https://github.com/2020/06/09/HashMap/p8.png">
+<meta property="article:published_time" content="2020-06-09T11:50:17.000Z">
+<meta property="article:modified_time" content="2020-06-09T12:24:29.266Z">
+<meta property="article:author" content="liqiang">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://github.com/2020/06/09/HashMap/p1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="HDU_LIQIANG&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">HDU_LIQIANG&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Java Coder</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://github.com/liqiang1127"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-HashMap" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/06/09/HashMap/" class="article-date">
+  <time datetime="2020-06-09T11:50:17.000Z" itemprop="datePublished">2020-06-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      HashMap
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="HashMap总结（问答）"><a href="#HashMap总结（问答）" class="headerlink" title="HashMap总结（问答）"></a>HashMap总结（问答）</h2><blockquote>
+<p> 好了我们开始今天的面试吧，小伙子你了解数据结构中的HashMap么？能跟我聊聊他的结构和底层原理么？</p>
+</blockquote>
+<p>嗯嗯面试官，我知道HashMap是我们非常常用的数据结构，由<strong>数组和链表组合构成</strong>的数据结构。</p>
+<p>大概如下，数组里面每个地方都存了Key-Value这样的实例，在Java7叫Entry在Java8中叫Node。</p>
+<img src="/2020/06/09/HashMap/p1.png" class title="ss">
+
+<p>因为他本身所有的位置都为null，在put插入的时候会根据key的hash去计算一个index值。</p>
+<p>就比如我put（”帅丙“，520），我插入了为”帅丙“的元素，这个时候我们会通过哈希函数计算出插入的位置，计算出来index是2那结果如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hash(<span class="string">"帅丙"</span>) = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<img src="/2020/06/09/HashMap/p2.png" class title="ss">
+
+<hr>
+<blockquote>
+<p>你提到了还有链表，为啥需要链表，链表又是怎么样子的呢？</p>
+</blockquote>
+<p>我们都知道数组长度是有限的，在有限的长度里面我们使用哈希，哈希本身就存在率性，就是”帅丙“和”丙帅“我们都去hash有一定的概率会一样，就像上面的情况我再次哈希”丙帅“极端情况也会hash到一个值上，那就形成了链表。</p>
+<img src="/2020/06/09/HashMap/p3.png" class title="ss">
+
+<p>每一个节点都会保存自身的hash、key、value、以及下个节点，我看看Node的源码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Map</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> hash;</span><br><span class="line">        <span class="keyword">final</span> K key;</span><br><span class="line">        V value;</span><br><span class="line">        Node&lt;K,V&gt; next;</span><br><span class="line">        ....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>说到链表我想问一下，你知道新的Entry节点在插入链表的时候，是怎么插入的么？</p>
+</blockquote>
+<p><strong>Java8之前是头插法</strong>，就是说新来的值会取代原有的值，原有的值就顺推到链表中去，就像上面的例子一样，因为写这个代码的作者认为后来的值被查找的可能性更大一点，提升查找的效率。</p>
+<p>但是，<strong>在Java8之后，都是所用尾部插入了。</strong>(原因是Java7中的头插法在并发情况下会导致rehash的时候成环)</p>
+<p>数组容量是有限的，数据多次插入的，到达一定的数量就会进行扩容，也就是resize。</p>
+<hr>
+<blockquote>
+<p>什么时候resize呢？</p>
+</blockquote>
+<p>有两个因素：</p>
+<ul>
+<li>Capacity：HashMap当前长度。</li>
+<li>LoadFactor：负载因子，默认值0.75f。</li>
+</ul>
+<p>怎么理解呢，就比如当前的容量大小为100，当你存进第76个的时候，判断发现需要进行resize了，那就进行扩容，但是HashMap的扩容也不是简单的扩大点容量这么简单的。</p>
+<hr>
+<blockquote>
+<p>扩容？它是怎么扩容的呢？</p>
+</blockquote>
+<p>分为两步</p>
+<ul>
+<li>扩容：创建一个新的Entry空数组，长度是原数组的2倍。</li>
+<li>ReHash：遍历原Entry数组，把所有的Entry重新Hash到新数组。</li>
+</ul>
+<hr>
+<blockquote>
+<p>为什么要重新Hash呢，直接复制过去不香么？</p>
+</blockquote>
+<p>是因为长度扩大以后，Hash的规则也随之改变。</p>
+<p>Hash的公式—&gt; index = HashCode（Key） &amp; （Length - 1）</p>
+<p>原来长度（Length）是8你位运算出来的值是2 ，新的长度是16你位运算出来的值明显不一样了。</p>
+<p>扩容前：</p>
+<img src="/2020/06/09/HashMap/p4.png" class title="ss">
+
+<p>扩容后:</p>
+<img src="/2020/06/09/HashMap/p5.png" class title="ss">
+
+<hr>
+<blockquote>
+<p>说完扩容机制我们言归正传，为啥之前用头插法，java8之后改成尾插了呢？</p>
+</blockquote>
+<p>我先举个例子吧，我们现在往一个容量大小为2的put两个值，负载因子是0.75是不是我们在put第二个的时候就会进行resize？</p>
+<p>2*0.75 = 1 所以插入第二个就要resize了</p>
+<p>现在我们要在容量为2的容器里面<strong>用不同线程</strong>插入A，B，C，假如我们在resize之前打个短点，那意味着数据都插入了但是还没resize那扩容前可能是这样的。</p>
+<p>我们可以看到链表的指向A-&gt;B-&gt;C</p>
+<p><strong>Tip：A的下一个指针是指向B的</strong></p>
+<img src="/2020/06/09/HashMap/p6.png" class title="ss">
+
+<p>因为resize的赋值方式，也就是使用了<strong>单链表的头插入方式，同一位置上新元素总会被放在链表的头部位置</strong>，在旧数组中同一条Entry链上的元素，通过重新计算索引位置后，有可能被放到了新数组的不同位置上。</p>
+<p>就可能出现下面的情况，大家发现问题没有？</p>
+<p>B的下一个指针指向了A</p>
+<img src="/2020/06/09/HashMap/p7.png" class title="ss">
+
+<p>一旦几个线程都调整完成，就可能出现环形链表</p>
+<img src="/2020/06/09/HashMap/p8.png" class title="ss">
+
+<p>如果这个时候去取值，悲剧就出现了——Infinite Loop。</p>
+<p><strong>使用头插</strong>会改变链表的上的顺序，但是如果<strong>使用尾插</strong>，在扩容时会保持链表元素原本的顺序，就不会出现链表成环的问题了。</p>
+<p>就是说原本是A-&gt;B，在扩容后那个链表还是A-&gt;B</p>
+<img src="/2020/06/09/HashMap/p8.png" class title="ss">
+
+<p>Java7在多线程操作HashMap时可能引起死循环，原因是扩容转移后前后链表顺序倒置，在转移过程中修改了原来链表中节点的引用关系。</p>
+<p>Java8在同样的前提下并不会引起死循环，原因是扩容转移后前后链表顺序不变，保持之前节点的引用关系。</p>
+<hr>
+<blockquote>
+<p>那是不是意味着Java8就可以把HashMap用在多线程中呢？</p>
+</blockquote>
+<p>我认为即使不会出现死循环，但是通过源码看到put/get方法都没有加同步锁，多线程情况最容易出现的就是：无法保证上一秒put的值，下一秒get的时候还是原值，所以线程安全还是无法保证。</p>
+<hr>
+<blockquote>
+<p>那我问你HashMap的默认初始化长度是多少？</p>
+</blockquote>
+<p>我记得我在看源码的时候<strong>初始化大小是16</strong> (实际上hashMap的大小必须是2^n)，这个是因为定位index的时候，避免%操作，而使用&amp;，提高速度。</p>
+<hr>
+<blockquote>
+<p>那为啥用16不用别的呢？</p>
+</blockquote>
+<p>因为在使用不是2的幂的数字的时候，Length-1的值是所有二进制位全为1，这种情况下，index的结果等同于HashCode后几位的值。</p>
+<p>只要输入的HashCode本身分布均匀，Hash算法的结果就是均匀的。</p>
+<p>这是为了<strong>实现均匀分布</strong>。</p>
+<hr>
+<blockquote>
+<p>哟小家伙，知道的确实很多，那我问你个问题，为啥我们重写equals方法的时候需要重写hashCode方法呢？</p>
+<p>你能用HashMap给我举个例子么？</p>
+</blockquote>
+<p>因为在java中，所有的对象都是继承于Object类。Ojbect类中有两个方法equals、hashCode，这两个方法都是用来比较两个对象是否相等的。</p>
+<p>在未重写equals方法我们是继承了object的equals方法，<strong>那里的 equals是比较两个对象的内存地址</strong>，显然我们new了2个对象内存地址肯定不一样</p>
+<ul>
+<li>对于值对象，==比较的是两个对象的值</li>
+<li>对于引用对象，比较的是两个对象的地址</li>
+</ul>
+<p>大家是否还记得我说的HashMap是通过key的hashCode去寻找index的，那index一样就形成链表了，也就是说”帅丙“和”丙帅“的index都可能是2，在一个链表上的。</p>
+<p>我们去get的时候，他就是根据key去hash然后计算出index，找到了2，那我怎么找到具体的”帅丙“还是”丙帅“呢？</p>
+<p><strong>equals</strong>！是的，所以如果我们对equals方法进行了重写，建议一定要对hashCode方法重写，以保证相同的对象返回相同的hash值，不同的对象返回不同的hash值。</p>
+<p>不然一个链表的对象，你哪里知道你要找的是哪个，到时候发现hashCode都一样，这不是完犊子嘛。</p>
+<hr>
+<blockquote>
+<p>可以可以小伙子，我记得你上面说过他是线程不安全的，那你能跟我聊聊你们是怎么处理HashMap在线程安全的场景么？</p>
+</blockquote>
+<p>面试官，在这样的场景，我们一般都会使用<strong>HashTable</strong>或者<strong>CurrentHashMap</strong>，但是因为前者的<strong>并发度</strong>的原因基本上没啥使用场景了，所以存在线程不安全的场景我们都使用的是CorruentHashMap。</p>
+<p>HashTable我看过他的源码，很简单粗暴，直接在方法上锁，并发度很低，最多同时允许一个线程访问，currentHashMap就好很多了，1.7和1.8有较大的不同，不过并发度都比前者好太多了。</p>
+<p>源码在此：(部分)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Make sure the value is not null</span></span><br><span class="line">        <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="最后总结"><a href="#最后总结" class="headerlink" title="最后总结"></a>最后总结</h2><p>HashMap常见面试题：</p>
+<ul>
+<li>HashMap的底层数据结构？</li>
+<li>HashMap的存取原理？</li>
+<li>Java7和Java8的区别？</li>
+<li>为啥会线程不安全？</li>
+<li>有什么线程安全的类代替么?</li>
+<li>默认初始化大小是多少？为啥是这么多？为啥大小都是2的幂？</li>
+<li>HashMap的扩容方式？负载因子是多少？为什是这么多？</li>
+<li>HashMap的主要参数都有哪些？</li>
+<li>HashMap是怎么处理hash碰撞的？</li>
+<li>hash的计算规则？</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/06/09/HashMap/" data-id="ckb7wchuh00007oug3dgw9dhk" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Mybatis核心组件
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Mysql和Redis双写一致性</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/">ConcurrentHashMap和HashTable</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/09/HashMap/">HashMap</a>
+          </li>
+        
+          <li>
+            <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/">Mysql和Redis双写一致性</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 liqiang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
