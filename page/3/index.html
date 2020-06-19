@@ -71,6 +71,57 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mysql-config" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/04/28/mysql-config/" class="article-date">
+  <time datetime="2020-04-28T11:48:51.000Z" itemprop="datePublished">2020-04-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/28/mysql-config/">Mysql5.6&amp;5.7配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong>MySQL 5.6 &amp; 5.7 最优配置模板</strong></p>
+<p>Inside 君整理了一份最新基于 MySQL 5.6 和 5.7 的配置文件模板，基本上可以说覆盖 90% 的调优选项，用户只需根据自己的服务器配置稍作修改即可，如 InnoDB 缓冲池的大小、IO 能力（innodb_buffer_pool_size，innodb_io_capacity）。特别注意，这份配置文件不用修改，可以直接运行在 MySQL 5.6 和 5.7 的版本下，这里使用了小小的技巧，具体可看配置文件。如果配置参数存在问题，也可以及时反馈 Inside 君，我们一起成长。</p>
+<p>触发 Inside 君做这件事情的原因是大部分网络上的 MySQL 配置文件都非常非常古老，大多都是基于 MySQL 5.1 的版本，这导致了绝大部分 MySQL 并没有运行在最优的环境，从而导致一些错误的使用，亦或是灾难性事故的发生，比如数据丢失，主从数据不一致等。而这些问题早在 5.6 版本及以后的版本中得到了解决。</p>
+<p>最后，抛弃你那所谓的、陈旧的、错误的 MySQL 配置文件，面向一个崭新的高性能、高可靠、高可扩展 MySQL 时代，你要做的就是下载这份配置文件并用于你的生产环境。</p>
+<p>insidemysql_my.cnf：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line">[client]</span><br><span class="line">user&#x3D;david</span><br><span class="line">password&#x3D;88888888</span><br><span class="line"></span><br><span class="line">[mysqld]</span><br><span class="line">########basic settings########</span><br><span class="line">server-id &#x3D; 11 </span><br><span class="line">port &#x3D; 3306</span><br><span class="line">user &#x3D; mysql</span><br><span class="line">bind_address &#x3D; 10.166.224.32</span><br><span class="line">autocommit &#x3D; 0</span><br><span class="line">character_set_server&#x3D;utf8mb4</span><br><span class="line">skip_name_resolve &#x3D; 1</span><br><span class="line">max_connections &#x3D; 800</span><br><span class="line">max_connect_errors &#x3D; 1000</span><br><span class="line">datadir &#x3D; &#x2F;data&#x2F;mysql_data</span><br><span class="line">transaction_isolation &#x3D; READ-COMMITTED</span><br><span class="line">explicit_defaults_for_timestamp &#x3D; 1</span><br><span class="line">join_buffer_size &#x3D; 134217728</span><br><span class="line">tmp_table_size &#x3D; 67108864</span><br><span class="line">tmpdir &#x3D; &#x2F;tmp</span><br><span class="line">max_allowed_packet &#x3D; 16777216</span><br><span class="line">sql_mode &#x3D; &quot;STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER&quot;</span><br><span class="line">interactive_timeout &#x3D; 1800</span><br><span class="line">wait_timeout &#x3D; 1800</span><br><span class="line">read_buffer_size &#x3D; 16777216</span><br><span class="line">read_rnd_buffer_size &#x3D; 33554432</span><br><span class="line">sort_buffer_size &#x3D; 33554432</span><br><span class="line">########log settings########</span><br><span class="line">log_error &#x3D; error.log</span><br><span class="line">slow_query_log &#x3D; 1</span><br><span class="line">slow_query_log_file &#x3D; slow.log</span><br><span class="line">log_queries_not_using_indexes &#x3D; 1</span><br><span class="line">log_slow_admin_statements &#x3D; 1</span><br><span class="line">log_slow_slave_statements &#x3D; 1</span><br><span class="line">log_throttle_queries_not_using_indexes &#x3D; 10</span><br><span class="line">expire_logs_days &#x3D; 90</span><br><span class="line">long_query_time &#x3D; 2</span><br><span class="line">min_examined_row_limit &#x3D; 100</span><br><span class="line">########replication settings########</span><br><span class="line">master_info_repository &#x3D; TABLE</span><br><span class="line">relay_log_info_repository &#x3D; TABLE</span><br><span class="line">log_bin &#x3D; bin.log</span><br><span class="line">sync_binlog &#x3D; 1</span><br><span class="line">gtid_mode &#x3D; on</span><br><span class="line">enforce_gtid_consistency &#x3D; 1</span><br><span class="line">log_slave_updates</span><br><span class="line">binlog_format &#x3D; row </span><br><span class="line">relay_log &#x3D; relay.log</span><br><span class="line">relay_log_recovery &#x3D; 1</span><br><span class="line">binlog_gtid_simple_recovery &#x3D; 1</span><br><span class="line">slave_skip_errors &#x3D; ddl_exist_errors</span><br><span class="line">########innodb settings########</span><br><span class="line">innodb_page_size &#x3D; 8192</span><br><span class="line">innodb_buffer_pool_size &#x3D; 6G</span><br><span class="line">innodb_buffer_pool_instances &#x3D; 8</span><br><span class="line">innodb_buffer_pool_load_at_startup &#x3D; 1</span><br><span class="line">innodb_buffer_pool_dump_at_shutdown &#x3D; 1</span><br><span class="line">innodb_lru_scan_depth &#x3D; 2000</span><br><span class="line">innodb_lock_wait_timeout &#x3D; 5</span><br><span class="line">innodb_io_capacity &#x3D; 4000</span><br><span class="line">innodb_io_capacity_max &#x3D; 8000</span><br><span class="line">innodb_flush_method &#x3D; O_DIRECT</span><br><span class="line">innodb_file_format &#x3D; Barracuda</span><br><span class="line">innodb_file_format_max &#x3D; Barracuda</span><br><span class="line">innodb_log_group_home_dir &#x3D; &#x2F;redolog&#x2F;</span><br><span class="line">innodb_undo_directory &#x3D; &#x2F;undolog&#x2F;</span><br><span class="line">innodb_undo_logs &#x3D; 128</span><br><span class="line">innodb_undo_tablespaces &#x3D; 3</span><br><span class="line">innodb_flush_neighbors &#x3D; 1</span><br><span class="line">innodb_log_file_size &#x3D; 4G</span><br><span class="line">innodb_log_buffer_size &#x3D; 16777216</span><br><span class="line">innodb_purge_threads &#x3D; 4</span><br><span class="line">innodb_large_prefix &#x3D; 1</span><br><span class="line">innodb_thread_concurrency &#x3D; 64</span><br><span class="line">innodb_print_all_deadlocks &#x3D; 1</span><br><span class="line">innodb_strict_mode &#x3D; 1</span><br><span class="line">innodb_sort_buffer_size &#x3D; 67108864 </span><br><span class="line">########semi sync replication settings########</span><br><span class="line">plugin_dir&#x3D;&#x2F;usr&#x2F;local&#x2F;mysql&#x2F;lib&#x2F;plugin</span><br><span class="line">plugin_load &#x3D; &quot;rpl_semi_sync_master&#x3D;semisync_master.so;rpl_semi_sync_slave&#x3D;semisync_slave.so&quot;</span><br><span class="line">loose_rpl_semi_sync_master_enabled &#x3D; 1</span><br><span class="line">loose_rpl_semi_sync_slave_enabled &#x3D; 1</span><br><span class="line">loose_rpl_semi_sync_master_timeout &#x3D; 5000</span><br><span class="line"></span><br><span class="line">[mysqld-5.7]</span><br><span class="line">innodb_buffer_pool_dump_pct &#x3D; 40</span><br><span class="line">innodb_page_cleaners &#x3D; 4</span><br><span class="line">innodb_undo_log_truncate &#x3D; 1</span><br><span class="line">innodb_max_undo_log_size &#x3D; 2G</span><br><span class="line">innodb_purge_rseg_truncate_frequency &#x3D; 128</span><br><span class="line">binlog_gtid_simple_recovery&#x3D;1</span><br><span class="line">log_timestamps&#x3D;system</span><br><span class="line">transaction_write_set_extraction&#x3D;MURMUR32</span><br><span class="line">show_compatibility_56&#x3D;on</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>作者：殷建卫</p>
+<p>链接：<a href="https://www.yuque.com/yinjianwei/vyrvkf/tb8uaw" target="_blank" rel="noopener">https://www.yuque.com/yinjianwei/vyrvkf/tb8uaw</a></p>
+<p>来源：<a href="https://www.yuque.com/yinjianwei/vyrvkf" target="_blank" rel="noopener">殷建卫 - 架构笔记</a></p>
+<p>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/04/28/mysql-config/" data-id="ck9qswfqi001b2cug9762814v" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Mysql-rules" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/04/28/Mysql-rules/" class="article-date">
@@ -1216,52 +1267,11 @@
 
 
   
-    <article id="post-102-二叉树的层序遍历" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/04/20/102-%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%B1%82%E5%BA%8F%E9%81%8D%E5%8E%86/" class="article-date">
-  <time datetime="2020-04-20T13:07:33.000Z" itemprop="datePublished">2020-04-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/20/102-%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%B1%82%E5%BA%8F%E9%81%8D%E5%8E%86/">102.二叉树的层序遍历</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><a href="https://leetcode-cn.com/problems/binary-tree-level-order-traversal/" target="_blank" rel="noopener">102.二叉树的层序遍历</a></p>
-<h3 id="分析一下"><a href="#分析一下" class="headerlink" title="分析一下"></a>分析一下</h3><p>一般二叉树层次遍历都是用广度优先遍历。一般的二叉树的广度优先遍历没法记录遍历到哪一层了，所以这里我定义了一个内部类，记录当前点的层次，完成此题。</p>
-<p>一般情况下，BFS多用队列去解决，DFS用栈或者递归(递归利用的是系统栈)。此题官网还有递归的解法思路也不错。</p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyNode</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> level;</span><br><span class="line">        TreeNode node;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">MyNode</span><span class="params">(TreeNode node, <span class="keyword">int</span> level)</span></span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.node = node;</span><br><span class="line">            <span class="keyword">this</span>.level = level;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> List&lt;List&lt;Integer&gt;&gt; levelOrder(TreeNode root) &#123;</span><br><span class="line">        Queue&lt;MyNode&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        List&lt;List&lt;Integer&gt;&gt; ans = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="keyword">if</span> (root == <span class="keyword">null</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> ans;</span><br><span class="line">        &#125;</span><br><span class="line">        MyNode node = <span class="keyword">new</span> MyNode(root, <span class="number">0</span>);</span><br><span class="line">        queue.add(node);</span><br><span class="line">        <span class="keyword">while</span> (!queue.isEmpty())&#123;</span><br><span class="line">            MyNode n = queue.remove();</span><br><span class="line">            <span class="keyword">if</span> (ans.size() == n.level)&#123;</span><br><span class="line">                ans.add(<span class="keyword">new</span> LinkedList&lt;&gt;());</span><br><span class="line">            &#125;</span><br><span class="line">            List&lt;Integer&gt; list = ans.get(n.level);</span><br><span class="line">            list.add(n.node.val);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (n.node.left != <span class="keyword">null</span>)</span><br><span class="line">                queue.add(<span class="keyword">new</span> MyNode(n.node.left, n.level + <span class="number">1</span>));</span><br><span class="line">            <span class="keyword">if</span> (n.node.right != <span class="keyword">null</span>)</span><br><span class="line">                queue.add(<span class="keyword">new</span> MyNode(n.node.right, n.level + <span class="number">1</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://github.com/liqiang1127/2020/04/20/102-%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%B1%82%E5%BA%8F%E9%81%8D%E5%8E%86/" data-id="ck9qswfpy00022cug9jkp55ec" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/2/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/">Next &amp;raquo;</a>
   </nav>
 
 </section>
@@ -1275,7 +1285,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux/" rel="tag">Linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Mybatis/" rel="tag">Mybatis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/" rel="tag">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" rel="tag">并发编程</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" rel="tag">网络通信</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
     </div>
   </div>
 
@@ -1285,7 +1295,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
     </div>
   </div>
 
@@ -1307,6 +1317,10 @@
       <ul>
         
           <li>
+            <a href="/2020/06/19/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E5%8F%AA%E6%9C%89%E4%B8%80%E7%A7%8D%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%9F/">为什么说只有一种实现线程的方式？</a>
+          </li>
+        
+          <li>
             <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
           </li>
         
@@ -1320,10 +1334,6 @@
         
           <li>
             <a href="/2020/06/09/HashMap/">HashMap</a>
-          </li>
-        
-          <li>
-            <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/">Mysql和Redis双写一致性</a>
           </li>
         
       </ul>
