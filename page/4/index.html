@@ -71,6 +71,46 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-1248-统计「优美子数组」" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/04/21/1248-%E7%BB%9F%E8%AE%A1%E3%80%8C%E4%BC%98%E7%BE%8E%E5%AD%90%E6%95%B0%E7%BB%84%E3%80%8D/" class="article-date">
+  <time datetime="2020-04-21T03:13:04.000Z" itemprop="datePublished">2020-04-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/21/1248-%E7%BB%9F%E8%AE%A1%E3%80%8C%E4%BC%98%E7%BE%8E%E5%AD%90%E6%95%B0%E7%BB%84%E3%80%8D/">1248.统计「优美子数组」</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><a href="https://leetcode-cn.com/problems/count-number-of-nice-subarrays/" target="_blank" rel="noopener">1248.统计「优美子数组」</a></p>
+<h3 id="分析一下"><a href="#分析一下" class="headerlink" title="分析一下"></a>分析一下</h3><p>这一题本质上是个找规律的题目。题解里面，声明odd[n+2]，以及odd[0]=-1，odd[++count]=num.length两个做法比较巧妙，省去了对边界的特殊处理。</p>
+<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">numberOfSubarrays</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (nums == <span class="keyword">null</span> || nums.length &lt; k)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> n = nums.length;</span><br><span class="line">        <span class="comment">// odd记录奇数出现的索引</span></span><br><span class="line">        <span class="comment">// 这里为什么声明n+2？</span></span><br><span class="line">        <span class="comment">// 因为我们要添加两个哨兵，0和count</span></span><br><span class="line">        <span class="keyword">int</span>[] odd = <span class="keyword">new</span> <span class="keyword">int</span>[n+<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] % <span class="number">2</span> == <span class="number">1</span>)</span><br><span class="line">                odd[++count] = i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 此处添加的两个哨兵，简化了边界处理</span></span><br><span class="line">        odd[<span class="number">0</span>] = -<span class="number">1</span>;</span><br><span class="line">        odd[++count] = n;</span><br><span class="line">        <span class="comment">// 记录计算结果</span></span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 核心思想：</span></span><br><span class="line">        <span class="comment">// 对于包含k个连续奇数的子数组，</span></span><br><span class="line">        <span class="comment">// 左边和右边分别添加一些偶数，</span></span><br><span class="line">        <span class="comment">// 这个子数组还是包含k个连续奇数的子数组，</span></span><br><span class="line">        <span class="comment">// 所以方案个数为左边可添加偶数的数目 * 右边可添加偶数的数目</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i + k &lt;= count; i++) &#123;</span><br><span class="line">            ans += (odd[i] - odd[i-<span class="number">1</span>]) * (odd[i+k] - odd[i+k-<span class="number">1</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/04/21/1248-%E7%BB%9F%E8%AE%A1%E3%80%8C%E4%BC%98%E7%BE%8E%E5%AD%90%E6%95%B0%E7%BB%84%E3%80%8D/" data-id="ck9qswfq600082cug03q1df62" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-102-二叉树的层序遍历" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/04/20/102-%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%B1%82%E5%BA%8F%E9%81%8D%E5%8E%86/" class="article-date">
@@ -838,174 +878,6 @@
 
 
   
-    <article id="post-JVM运行时数据区" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" class="article-date">
-  <time datetime="2020-03-14T06:13:08.000Z" itemprop="datePublished">2020-03-14</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/">JVM运行时数据区</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>JVM运行时数据区在不同的JDK版本有一点不一样。</p>
-<h2 id="JDK-1-7"><a href="#JDK-1-7" class="headerlink" title="JDK-1.7"></a>JDK-1.7</h2><img src="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/jdk7.png" class title="jdk1.7的运行时数据区">
-
-<h3 id="1-线程共享的区域"><a href="#1-线程共享的区域" class="headerlink" title="1. 线程共享的区域"></a>1. 线程共享的区域</h3><ol>
-<li><p><strong>堆(Heap)</strong></p>
-<p> Heap是JVM的<strong>内存数据区</strong>。Heap的管理很复杂，是被所有线程共享的内存区域，在JVM启动时候创建，专门<strong>用来保存对象的实例</strong>。在Heap中分配一定的内存来保存对象实例，实际上也只是保存对象实例的属性值、属性的类型和对象本身的类型标记等，并不保存对象的方法(以栈帧的形式保存在Stack中)。</p>
-<p> 对象实例在Heap中分配以后，在Stack中保存一个4字节的Heap内存地址，用来定位改对象实例在Heap中的位置。</p>
-<p> Heap是<strong>垃圾回收</strong>的主要场所。Java堆出于物理不连续的内存空间中，只要逻辑上连续即可。</p>
-</li>
-<li><p><strong>方法区(Method Area)</strong></p>
-<p> Objec Class Data(加载类的定义的数据)是存储在方法区的。除此以外，<strong>常量</strong>、<strong>静态变量</strong>、<strong>JIT</strong>(<strong>即时编译器</strong>)编译后的代码也在方法区。正因为方法区所存储的数据与堆有一种类比关系，所以它还被成为Non-Heap。</p>
-<p> <strong>垃圾回收</strong>在方法区比较少出现，这个区域回收的目的主要针对的是<strong>常量池</strong>和<strong>类的卸载</strong>。</p>
-<p> <strong>方法区</strong>只是JVM规范中定义的一个区域，在jdk1.8之前的实现叫做<strong>永久区(permanent)</strong>，而在jdk1.8之后叫做<strong>元数据区(metaspace)</strong>。方法区下一节详细介绍。</p>
-</li>
-</ol>
-<h3 id="2-线程隔离的区域"><a href="#2-线程隔离的区域" class="headerlink" title="2. 线程隔离的区域"></a>2. 线程隔离的区域</h3><ol start="3">
-<li><p><strong>虚拟机栈(VM Stack)</strong></p>
-<p> 首先来了解一下Java指令的构成：<br> Java指令由操作码(方法本身)和操作数(方法内部变量)组成。</p>
-<ol>
-<li><p>方法本身是指令的操作码部分，保存在Stack中。</p>
-</li>
-<li><p>方法内部变量(局部变量)作为指令的操作数部分，跟在指令的操作码之后，保存在Stack中。(实际上是<strong>简单数据类型</strong>，对象类型在Stack中保存的是地址)。</p>
-</li>
-<li><p>虚拟机栈也叫栈内存，是在线程创建是创建的，它的生命期是跟随线程的生命期，线程结束栈内存也就释放了。对于栈来说不存在垃圾回收问题，只要线程一结束，该栈就over，所以么有垃圾回收。也有一部分资料翻译成Java方法栈，大概是因为它所描述的是<strong>Java方法执行的内存模型</strong>，每个方法执行时同时创建栈帧(stack frame)用于记录存储局部变量表(包含了对应的方法参数和局部变量)、操作数栈(Operand Stack)记录出栈、入栈的操作、动态链接和方法出口等信息。每个方法被调用知道执行完成的过程，对应着栈帧在虚拟机栈的入栈和出栈的过程。</p>
-</li>
-<li><p>局部变量表存放了编译期可知的<strong>各种基本数据类型</strong>(<strong>boolean、byte、char、short、int、float、long、double</strong>)、<strong>对象的引用</strong>(<strong>reference类型</strong>)和<strong>returnAddress</strong>(指向下一条字节码指令的地址)。局部变量表所需要的内存空间在编译期间完成分配，在方法运行之前，改变量表所需的内存是固定的，在运行期间也不会改变。</p>
-<img src="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/stack.png" class title="vmstack">
-</li>
-</ol>
-</li>
-<li><p><strong>本地方法栈(Native Method Stack)</strong></p>
-<p> 与VM Stack相似，VM Stack为JVM提供执行Java方法的服务，Native Method Stack则为JVM提供native方法的服务。</p>
-</li>
-<li><p><strong>程序计数器</strong></p>
-<p> 这是一块较小的内存区域，可以看做当前线程执行的字节码的位置指示器。分支、跳转、循环、异常处理和线程恢复等基础功能都需要依赖程序计数器完成。</p>
-</li>
-</ol>
-<h2 id="JDK-1-8"><a href="#JDK-1-8" class="headerlink" title="JDK-1.8"></a>JDK-1.8</h2><img src="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/jdk8.png" class title="jdk1.8的运行时数据区">
-
-<h3 id="再谈方法区"><a href="#再谈方法区" class="headerlink" title="再谈方法区"></a><strong>再谈方法区</strong></h3><p>jdk8同jdk7比，最大的差别就是：<strong>元数据区取代了永久代</strong>。元空间的本质和永久代类似，都是<strong>对JVM规范中方法区的实现</strong>。不过元空间与永久代之间最大的区别在于：元数据空间并不在虚拟机中，而是使用本地内存。</p>
-<p>方法区可能是JVM运行时数据区里最抽象的地方了，这里详细总结一下。</p>
-<h3 id="方法区里面到底存了什么？"><a href="#方法区里面到底存了什么？" class="headerlink" title="方法区里面到底存了什么？"></a><strong>方法区里面到底存了什么？</strong></h3><ul>
-<li><p>虚拟机已加载的类的信息。例如：类的版本、字段、方法、接口。</p>
-</li>
-<li><p>运行时常量池。</p>
-</li>
-</ul>
-<img src="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/%E6%96%B9%E6%B3%95%E5%8C%BA.png" class title="方法区">
-
-<p>1、类型信息：</p>
-<pre><code>类的完整名称
-
-类的直接父类的完整名称
-
-类的直接实现接口的有序列表
-
-类型标志（类类型还是接口类型）
-
-类的修饰符（public private defautl abstract final static）</code></pre><p>2、<strong>类型的常量池</strong></p>
-<pre><code>存放该类型所用到的常量的有序集合。
-
-包括直接常量（字符串、整数、浮点数）和对其他类型、字段、方法的符号引用。</code></pre><p>3、字段信息（该类声明的所有字段）</p>
-<pre><code>字段修饰符（public、peotect、private、default）
-
-字段的类型
-
-字段名称</code></pre><p>4、方法信息</p>
-<pre><code>方法信息中包含类的所有方法。
-
-方法修饰符
-
-方法返回类型
-
-方法名
-
-方法参数个数、类型、顺序等
-
-方法字节码
-
-操作数栈和该方法在栈帧中的局部变量区大小
-
-异常表</code></pre><p>5、类变量（静态变量）</p>
-<p>6、指向类加载器的引用</p>
-<p>7、指向Class实例的引用</p>
-<p>8、方法表</p>
-<p>9、<strong>运行时常量池</strong>（Runtime Constant Pool）</p>
-<h3 id="常量池又是什么？"><a href="#常量池又是什么？" class="headerlink" title="常量池又是什么？"></a><strong>常量池又是什么？</strong></h3><p><strong>常量池分类</strong><br>常量池大致可以分为：<strong>静态常量池</strong>和<strong>运行时常量池</strong></p>
-<p>静态常量池：也就是上面提到的<strong>类型的常量池</strong>。位于class文件中。</p>
-<p>运行时常量池(动态常量池)：就是在class文件被加载进了内存之后，常量池保存在了方法区中。运行时常量池具备动态性，也就是并非预置入Class文件的内容才能进入方法区的运行时常量池，运行期间也可能将新的常量放入池中。</p>
-<p><strong>常量池存了个啥</strong></p>
-<img src="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/%E5%B8%B8%E9%87%8F%E6%B1%A0%E5%86%85%E5%AE%B9.png" class title="常量池内容">
-
-<p><strong>另一张方法区的图</strong></p>
-<img src="/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/%E6%96%B9%E6%B3%95%E5%8C%BA2.png" class title="方法区">
-
-<p>这张图实际上和之前的方法区的图类似，总体上将方法区分成2大部分，一部分是类信息，一部分是运行时常量池。只不过这张图特别地表示了静态常量池(class文件常量池)</p>
-<p><strong>字符串常量池</strong></p>
-<p>有些资料说常量池分成3种，静态常量池、运行时常量池和字符串常量池。但有些资料分成两类(就是我上节分的两类)，理由是：</p>
-<blockquote>
-<p>运行时常量池逻辑上是包含字符串常量池的。</p>
-</blockquote>
-<p>在JDK6.0及之前版本，<strong>字符串常量池是放在Perm Gen区(也就是方法区)中</strong>；</p>
-<p>在JDK7.0版本，<strong>字符串常量池被移到了堆中</strong>。至于为什么移到堆内，大概是由于方法区的内存空间太小了。</p>
-<p>在HotSpot VM里实现的string pool功能的是一个StringTable类，它是一个Hash表，默认值大小长度是1009；这个StringTable在每个HotSpot VM的实例只有一份，被所有的类共享。字符串常量由一个一个字符组成，放在了StringTable上。</p>
-<p>在JDK6.0中，StringTable的长度是固定的，长度就是1009，因此如果放入String Pool中的String非常多，就会造成hash冲突，导致链表过长，当调用String#intern()时会需要到链表上一个一个找，从而导致性能大幅度下降；</p>
-<p>在JDK7.0中，StringTable的长度可以通过参数指定：</p>
-<p>-XX:StringTableSize=66666</p>
-<p><strong>String#intern()</strong></p>
-<p>在说到常量池，尤其是字符串常量池的时候，常常会问到String#intern()。由于<strong>JDK7.0以后字符串常量池被移动到了堆内存中</strong>，所以String#intern()的行为发生了一些变化。</p>
-<p>在JDK 1.6中，调用String#intern()(假如String内容是”aa”)，去字符串常量池中(此时的字符串常量池在方法区)找没有没”aa”，如果有就返回aa的引用，如果没有就创建一个”aa”，然后返回引用。</p>
-<p>在JDK 1.7中，此时的字符串常量池是在堆中的，同样是调用intern()，不会再在常量池中创建新的字符串，而是把堆上”aa”字符串的引用放到常量池中。</p>
-<p>这一部分挺难理解的，可以参考<a href="https://blog.csdn.net/Alphr/article/details/105325033?depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-OPENSEARCH-3&utm_source=distribute.pc_relevant_right.none-task-blog-OPENSEARCH-3" target="_blank" rel="noopener">String#intern()</a></p>
-<h2 id="为什么要把永久区取消，用元空间代替？"><a href="#为什么要把永久区取消，用元空间代替？" class="headerlink" title="为什么要把永久区取消，用元空间代替？"></a>为什么要把永久区取消，用元空间代替？</h2><ul>
-<li><p>永久代大小固定，不可变。</p>
-</li>
-<li><p>字符串存在永久代中，容易出现性能问题和内存溢出。</p>
-</li>
-<li><p>类及方法的信息等比较难确定其大小，因此对于永久代的大小指定比较困难，太小容易出现永久代溢出，太大则容易导致老年代溢出。</p>
-</li>
-<li><p>永久代会为 GC 带来不必要的复杂度，并且回收效率偏低。</p>
-</li>
-</ul>
-<h2 id="总结一下"><a href="#总结一下" class="headerlink" title="总结一下"></a>总结一下</h2><ul>
-<li><p>jdk1.7之前：方法区位于永久代(PermGen)，永久代和堆相互隔离，永久代的大小在启动JVM时可以设置一个固定值，不可变。</p>
-</li>
-<li><p>jdk.7：存储在永久代的部分数据就已经转移到Java Heap或者Native memory。但永久代仍存在于JDK 1.7中，并没有完全移除，譬如符号引用(Symbols)转移到了native memory；字符串常量池(interned strings)转移到了Java heap；类的静态变量(class statics variables )转移到了Java heap。</p>
-</li>
-<li><p>jdk1.8：仍然保留方法区的概念，只不过实现方式不同。取消永久代，方法存放于元空间(Metaspace)，元空间仍然与堆不相连，但与堆共享物理内存，逻辑上可认为在堆中。</p>
-</li>
-</ul>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://github.com/liqiang1127/2020/03/14/JVM%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" data-id="ckannzzmr0000xcug4cqqebck" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -1034,7 +906,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 12px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
     </div>
   </div>
 
@@ -1056,6 +928,10 @@
       <ul>
         
           <li>
+            <a href="/2020/06/19/%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%81%9C%E6%AD%A2%E7%BA%BF%E7%A8%8B%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8volatile%E6%A0%87%E8%AE%B0%E4%BD%8D%E7%9A%84%E6%96%B9%E6%B3%95%E6%98%AF%E9%94%99%E8%AF%AF%E7%9A%84%EF%BC%9F/">如何正确停止线程？为什么用volatile标记位的方法是错误的？</a>
+          </li>
+        
+          <li>
             <a href="/2020/06/19/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E5%8F%AA%E6%9C%89%E4%B8%80%E7%A7%8D%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%9F/">为什么说只有一种实现线程的方式？</a>
           </li>
         
@@ -1069,10 +945,6 @@
         
           <li>
             <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
-          </li>
-        
-          <li>
-            <a href="/2020/06/09/HashMap/">HashMap</a>
           </li>
         
       </ul>

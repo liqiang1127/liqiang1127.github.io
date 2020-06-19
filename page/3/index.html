@@ -71,6 +71,170 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mysql-index-concept" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/04/28/mysql-index-concept/" class="article-date">
+  <time datetime="2020-04-28T12:48:10.000Z" itemprop="datePublished">2020-04-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/28/mysql-index-concept/">聚集索引&amp;非聚集索引&amp;覆盖索引总结</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="一-索引简介"><a href="#一-索引简介" class="headerlink" title="一.索引简介"></a>一.索引简介</h2><p>众所周知，索引是关系型数据库中给数据库表中一列或多列的值排序后的存储结构，SQL的主流索引结构有B+树以及Hash结构，聚集索引以及非聚集索引用的是B+树索引。这篇文章会总结MySQL的InnoDB和MyISAM两种引擎的索引。</p>
+<h2 id="二-聚集索引"><a href="#二-聚集索引" class="headerlink" title="二.聚集索引"></a>二.聚集索引</h2><p>聚集（clustered）索引，也叫聚簇索引。</p>
+<blockquote>
+<p>定义：数据行的物理顺序与列值（一般是主键的那一列）的逻辑顺序相同，一个表中只能拥有一个聚集索引。</p>
+</blockquote>
+<p>单单从定义来看是不是显得有点抽象，打个比方，一个表就像是我们以前用的新华字典，聚集索引就像是拼音目录，而每个字存放的页码就是我们的数据物理地址，我们如果要查询一个“哇”字，我们只需要查询“哇”字对应在新华字典拼音目录对应的页码，就可以查询到对应的“哇”字所在的位置，而拼音目录对应的A-Z的字顺序，和新华字典实际存储的字的顺序A-Z也是一样的，如果我们中文新出了一个字，拼音开头第一个是B，那么他插入的时候也要按照拼音目录顺序插入到A字的后面，现在用一个简单的示意图来大概说明一下在数据库中的样子：</p>
+<table>
+<thead>
+<tr>
+<th>地址</th>
+<th>id</th>
+<th>username</th>
+<th>score</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x01</td>
+<td>1</td>
+<td>小明</td>
+<td>90</td>
+</tr>
+<tr>
+<td>0x02</td>
+<td>2</td>
+<td>小红</td>
+<td>80</td>
+</tr>
+<tr>
+<td>0x03</td>
+<td>3</td>
+<td>小华</td>
+<td>92</td>
+</tr>
+<tr>
+<td>..</td>
+<td>..</td>
+<td>..</td>
+<td>..</td>
+</tr>
+<tr>
+<td>0xff</td>
+<td>256</td>
+<td>小英</td>
+<td>70</td>
+</tr>
+</tbody></table>
+<p>注：第一列的地址表示该行数据在磁盘中的物理地址，后面三列才是我们SQL里面用的表里的列，其中id是主键，建立了聚集索引。</p>
+<p>结合上面的表格就可以理解这句话了吧：数据行的物理顺序与列值的<strong>顺序相同</strong>，如果我们查询id比较靠后的数据，那么这行数据的地址在磁盘中的物理地址也会比较靠后。而且由于物理排列方式与聚集索引的顺序相同，所以也就只能建立一个聚集索引了。</p>
+<img src="/2020/04/28/mysql-index-concept/1.png" class title="ss">
+
+<p><strong>聚集索引实际存放的示意图</strong></p>
+<p>从上图可以看出聚集索引的好处了，索引的叶子节点就是对应的数据节点（MySQL的MyISAM除外，此存储引擎的聚集索引和非聚集索引只多了个唯一约束，其他没什么区别），可以直接获取到对应的全部列的数据，而非聚集索引在索引没有覆盖到对应的列的时候需要进行二次查询，后面会详细讲。因此在查询方面，聚集索引的速度往往会更占优势。</p>
+<h3 id="创建聚集索引"><a href="#创建聚集索引" class="headerlink" title="创建聚集索引"></a>创建聚集索引</h3><p>如果不创建索引，系统会自动创建一个隐含列作为表的聚集索引。</p>
+<ol>
+<li><p>创建表的时候指定主键（注意：SQL Sever默认主键为聚集索引，也可以指定为非聚集索引，而MySQL里主键就是聚集索引）</p>
+</li>
+<li><p>创建表后添加聚集索引</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> table_name <span class="keyword">add</span> primary <span class="keyword">key</span>(colum_name)</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是，最好还是在创建表的时候添加聚集索引，由于聚集索引的物理顺序上的特殊性，因此如果再在上面创建索引的时候会根据索引列的排序移动全部数据行上面的顺序，会非常地耗费时间以及性能。</p>
+</li>
+</ol>
+<h2 id="三-非聚集索引"><a href="#三-非聚集索引" class="headerlink" title="三.非聚集索引"></a>三.非聚集索引</h2><p>非聚集（unclustered）索引。</p>
+<blockquote>
+<p>定义：该索引中索引的逻辑顺序与磁盘上行的物理存储顺序不同，一个表中可以拥有多个非聚集索引。</p>
+</blockquote>
+<p>其实按照定义，除了聚集索引以外的索引都是非聚集索引，只是人们想细分一下非聚集索引，分成<strong>普通索引</strong>，<strong>唯一索引</strong>，<strong>全文索引</strong>。如果非要把非聚集索引类比成现实生活中的东西，那么非聚集索引就像新华字典的偏旁字典，他结构顺序与实际存放顺序不一定一致。</p>
+<img src="/2020/04/28/mysql-index-concept/2.png" class title="ss">
+
+<h3 id="非聚集索引的二次查询问题"><a href="#非聚集索引的二次查询问题" class="headerlink" title="非聚集索引的二次查询问题"></a>非聚集索引的二次查询问题</h3><p>非聚集索引叶节点仍然是索引节点，只是有一个指针指向对应的数据块，此如果使用非聚集索引查询，而查询列中包含了其他该索引没有覆盖的列，那么他还要进行第二次的查询，查询节点上对应的数据行的数据。</p>
+<p>如有以下表t1：</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>username</th>
+<th>score</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>小明</td>
+<td>90</td>
+</tr>
+<tr>
+<td>2</td>
+<td>小红</td>
+<td>80</td>
+</tr>
+<tr>
+<td>3</td>
+<td>小华</td>
+<td>92</td>
+</tr>
+<tr>
+<td>..</td>
+<td>..</td>
+<td>..</td>
+</tr>
+<tr>
+<td>256</td>
+<td>小英</td>
+<td>70</td>
+</tr>
+</tbody></table>
+<p>以及聚集索引clustered index(id), 非聚集索引<strong>index(username)</strong>。</p>
+<p>使用以下语句进行查询，不需要进行二次查询，直接就可以从非聚集索引的节点里面就可以获取到查询列的数据。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="keyword">id</span>, username <span class="keyword">from</span> t1 <span class="keyword">where</span> username = <span class="string">'小明'</span></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> t1 <span class="keyword">where</span> username = <span class="string">'小明'</span></span><br></pre></td></tr></table></figure>
+
+<p>但是使用以下语句进行查询，就需要二次的查询去获取原数据行的score：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> username, score <span class="keyword">from</span> t1 <span class="keyword">where</span> username = <span class="string">'小明'</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>原因是score不在索引中，所以得回表查询。</strong></p>
+<h3 id="解决办法：覆盖索引"><a href="#解决办法：覆盖索引" class="headerlink" title="解决办法：覆盖索引"></a>解决办法：覆盖索引</h3><blockquote>
+<p>如果查询的内容（select col1, col2），col1和col2都在索引中，那就不用回表了。满足这个条件就叫覆盖索引。</p>
+</blockquote>
+<p>要注意使用复合索引需要满足最左侧索引的原则，也就是查询的时候如果where条件里面没有最左边的一到多列，索引就不会起作用。</p>
+<p>在SQL Server中还有include的用法，可以把非聚集索引里包含的列包含进来，而不一定需要建立复合索引。</p>
+<h2 id="四-总结与使用心得"><a href="#四-总结与使用心得" class="headerlink" title="四.总结与使用心得"></a>四.总结与使用心得</h2><ol>
+<li>使用聚集索引的查询效率要比非聚集索引的效率要高，但是如果需要频繁去改变聚集索引的值，写入性能并不高，因为需要移动对应数据的物理位置。</li>
+<li>非聚集索引在查询的时候可以的话就避免二次查询，这样性能会大幅提升。</li>
+<li>不是所有的表都适合建立索引，只有数据量大表才适合建立索引，且建立在选择性高的列上面性能会更好。</li>
+</ol>
+<blockquote>
+<p>文章来源：<a href="https://www.cnblogs.com/s-b-b/p/8334593.html" target="_blank" rel="noopener">[聚集索引与非聚集索引的总结]</a></p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/04/28/mysql-index-concept/" data-id="ck9qswfqo001q2cug5q2nd82r" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/" rel="tag">mysql</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-mysql-config" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/04/28/mysql-config/" class="article-date">
@@ -1227,46 +1391,6 @@
 
 
   
-    <article id="post-1248-统计「优美子数组」" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/04/21/1248-%E7%BB%9F%E8%AE%A1%E3%80%8C%E4%BC%98%E7%BE%8E%E5%AD%90%E6%95%B0%E7%BB%84%E3%80%8D/" class="article-date">
-  <time datetime="2020-04-21T03:13:04.000Z" itemprop="datePublished">2020-04-21</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/21/1248-%E7%BB%9F%E8%AE%A1%E3%80%8C%E4%BC%98%E7%BE%8E%E5%AD%90%E6%95%B0%E7%BB%84%E3%80%8D/">1248.统计「优美子数组」</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><a href="https://leetcode-cn.com/problems/count-number-of-nice-subarrays/" target="_blank" rel="noopener">1248.统计「优美子数组」</a></p>
-<h3 id="分析一下"><a href="#分析一下" class="headerlink" title="分析一下"></a>分析一下</h3><p>这一题本质上是个找规律的题目。题解里面，声明odd[n+2]，以及odd[0]=-1，odd[++count]=num.length两个做法比较巧妙，省去了对边界的特殊处理。</p>
-<h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">numberOfSubarrays</span><span class="params">(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (nums == <span class="keyword">null</span> || nums.length &lt; k)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> n = nums.length;</span><br><span class="line">        <span class="comment">// odd记录奇数出现的索引</span></span><br><span class="line">        <span class="comment">// 这里为什么声明n+2？</span></span><br><span class="line">        <span class="comment">// 因为我们要添加两个哨兵，0和count</span></span><br><span class="line">        <span class="keyword">int</span>[] odd = <span class="keyword">new</span> <span class="keyword">int</span>[n+<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] % <span class="number">2</span> == <span class="number">1</span>)</span><br><span class="line">                odd[++count] = i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 此处添加的两个哨兵，简化了边界处理</span></span><br><span class="line">        odd[<span class="number">0</span>] = -<span class="number">1</span>;</span><br><span class="line">        odd[++count] = n;</span><br><span class="line">        <span class="comment">// 记录计算结果</span></span><br><span class="line">        <span class="keyword">int</span> ans = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 核心思想：</span></span><br><span class="line">        <span class="comment">// 对于包含k个连续奇数的子数组，</span></span><br><span class="line">        <span class="comment">// 左边和右边分别添加一些偶数，</span></span><br><span class="line">        <span class="comment">// 这个子数组还是包含k个连续奇数的子数组，</span></span><br><span class="line">        <span class="comment">// 所以方案个数为左边可添加偶数的数目 * 右边可添加偶数的数目</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i + k &lt;= count; i++) &#123;</span><br><span class="line">            ans += (odd[i] - odd[i-<span class="number">1</span>]) * (odd[i+k] - odd[i+k-<span class="number">1</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://github.com/liqiang1127/2020/04/21/1248-%E7%BB%9F%E8%AE%A1%E3%80%8C%E4%BC%98%E7%BE%8E%E5%AD%90%E6%95%B0%E7%BB%84%E3%80%8D/" data-id="ck9qswfq600082cug03q1df62" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -1295,7 +1419,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 10px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 12px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
     </div>
   </div>
 
@@ -1317,6 +1441,10 @@
       <ul>
         
           <li>
+            <a href="/2020/06/19/%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%81%9C%E6%AD%A2%E7%BA%BF%E7%A8%8B%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8volatile%E6%A0%87%E8%AE%B0%E4%BD%8D%E7%9A%84%E6%96%B9%E6%B3%95%E6%98%AF%E9%94%99%E8%AF%AF%E7%9A%84%EF%BC%9F/">如何正确停止线程？为什么用volatile标记位的方法是错误的？</a>
+          </li>
+        
+          <li>
             <a href="/2020/06/19/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E5%8F%AA%E6%9C%89%E4%B8%80%E7%A7%8D%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%9F/">为什么说只有一种实现线程的方式？</a>
           </li>
         
@@ -1330,10 +1458,6 @@
         
           <li>
             <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
-          </li>
-        
-          <li>
-            <a href="/2020/06/09/HashMap/">HashMap</a>
           </li>
         
       </ul>
