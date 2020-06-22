@@ -71,6 +71,127 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-JVM垃圾收集器" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/" class="article-date">
+  <time datetime="2020-05-26T09:10:39.000Z" itemprop="datePublished">2020-05-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/">JVM垃圾收集器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="JVM垃圾收集器种类"><a href="#JVM垃圾收集器种类" class="headerlink" title="JVM垃圾收集器种类"></a>JVM垃圾收集器种类</h2><p>如果说收集算法是内存回收的方法论，那么垃圾收集器就是内存回收的具体实现。Java 虚拟机规范并没有规定垃圾收集器应该如何实现，因此一般来说不同厂商，不同版本的虚拟机提供的垃圾收集器实现可能会有差别，一般会给出参数来让用户根据应用的特点来组合各个年代使用的收集器，主要有以下垃圾收集器</p>
+<img src="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/1.png" class title="ss">
+
+<ul>
+<li>在新生代工作的垃圾回收器：Serial, ParNew, ParallelScavenge</li>
+<li>在老年代工作的垃圾回收器：CMS，Serial Old, Parallel Old</li>
+<li>同时在新老生代工作的垃圾回收器：G1</li>
+</ul>
+<p>图片中的垃圾收集器如果存在连线，则代表它们之间可以配合使用，接下来我们来看看各个垃圾收集器的具体功能。</p>
+<h3 id="新生代收集器"><a href="#新生代收集器" class="headerlink" title="新生代收集器"></a>新生代收集器</h3><h4 id="Serial-收集器"><a href="#Serial-收集器" class="headerlink" title="Serial 收集器"></a>Serial 收集器</h4><p>Serial 收集器是工作在新生代的，单线程的垃圾收集器，单线程意味着它只会使用一个 CPU 或一个收集线程来完成垃圾回收，不仅如此，还记得我们上文提到的 STW 了吗，它在进行垃圾收集时，其他用户线程会暂停，直到垃圾收集结束，也就是说在 GC 期间，此时的应用不可用。</p>
+<p>看起来单线程垃圾收集器不太实用，不过我们需要知道的任何技术的使用都不能脱离场景，在 <strong>Client 模式</strong>下，它简单有效（与其他收集器的单线程比），对于限定单个 CPU 的环境来说，Serial 单线程模式无需与其他线程交互，减少了开销，专心做 GC 能将其单线程的优势发挥到极致，另外在用户的桌面应用场景，分配给虚拟机的内存一般不会很大，收集几十甚至一两百兆（仅是新生代的内存，桌面应用基本不会再大了），STW 时间可以控制在一百多毫秒内，只要不是频繁发生，这点停顿是可以接受的，所以对于运行在 Client 模式下的虚拟机，Serial 收集器是新生代的默认收集器</p>
+<h4 id="ParNew-收集器"><a href="#ParNew-收集器" class="headerlink" title="ParNew 收集器"></a>ParNew 收集器</h4><p>ParNew 收集器是 Serial 收集器的多线程版本，除了使用多线程，其他像收集算法,STW,对象分配规则，回收策略与 Serial 收集器完成一样，在底层上，这两种收集器也共用了相当多的代码，它的垃圾收集过程如下</p>
+<img src="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/2.png" class title="ss">
+
+<p>ParNew 主要工作在 Server 模式，我们知道服务端如果接收的请求多了，响应时间就很重要了，多线程可以让垃圾回收得更快，也就是减少了 STW 时间，能提升响应时间，所以是许多运行在 Server 模式下的虚拟机的首选新生代收集器，另一个与性能无关的原因是因为除了 Serial  收集器，<strong>只有它能与 CMS 收集器配合工作</strong>，CMS 是一个划时代的垃圾收集器，是真正意义上的<strong>并发收集器</strong>，它第一次实现了垃圾收集线程与用户线程（基本上）同时工作，它采用的是传统的 GC 收集器代码框架，与 Serial,ParNew 共用一套代码框架，所以能与这两者一起配合工作，而后文提到的 Parallel Scavenge 与 G1 收集器没有使用传统的 GC 收集器代码框架，而是另起炉灶独立实现的，另外一些收集器则只是共用了部分的框架代码,所以无法与 CMS 收集器一起配合工作。</p>
+<p>在多 CPU 的情况下，由于 ParNew 的多线程回收特性，毫无疑问垃圾收集会更快，也能有效地减少 STW 的时间，提升应用的响应速度。</p>
+<h4 id="Parallel-Scavenge-收集器"><a href="#Parallel-Scavenge-收集器" class="headerlink" title="Parallel Scavenge 收集器"></a>Parallel Scavenge 收集器</h4><p>Parallel Scavenge 收集器也是一个使用<strong>复制算法</strong>，<strong>多线程</strong>，工作于新生代的垃圾收集器，看起来功能和 ParNew 收集器一样，它有啥特别之处吗</p>
+<p><strong>关注点不同</strong>，CMS 等垃圾收集器关注的是尽可能缩短垃圾收集时用户线程的停顿时间，而 Parallel Scavenge 目标是达到一个可控制的吞吐量（吞吐量 = 运行用户代码时间 / （运行用户代码时间+垃圾收集时间）），也就是说 CMS 等垃圾收集器更适合用到与用户交互的程序，因为停顿时间越短，用户体验越好，而 Parallel Scavenge 收集器关注的是吞吐量，所以更适合做后台运算等不需要太多用户交互的任务。</p>
+<p>Parallel Scavenge 收集器提供了两个参数来精确控制吞吐量，分别是控制最大垃圾收集时间的 -XX:MaxGCPauseMillis 参数及直接设置吞吐量大小的 -XX:GCTimeRatio（默认99%）</p>
+<p>除了以上两个参数，还可以用 Parallel Scavenge 收集器提供的第三个参数 -XX:UseAdaptiveSizePolicy，开启这个参数后，就不需要手工指定新生代大小,Eden 与 Survivor 比例（SurvivorRatio）等细节，只需要设置好基本的堆大小（-Xmx 设置最大堆）,以及最大垃圾收集时间与吞吐量大小，虚拟机就会根据当前系统运行情况收集监控信息，动态调整这些参数以尽可能地达到我们设定的最大垃圾收集时间或吞吐量大小这两个指标。自适应策略也是 Parallel Scavenge  与 ParNew 的重要区别！</p>
+<h3 id="老年代收集器"><a href="#老年代收集器" class="headerlink" title="老年代收集器"></a>老年代收集器</h3><h4 id="Serial-Old-收集器"><a href="#Serial-Old-收集器" class="headerlink" title="Serial Old 收集器"></a>Serial Old 收集器</h4><p>上文我们知道， Serial 收集器是工作于新生代的单线程收集器，与之相对地，Serial Old 是工作于老年代的单线程收集器，此收集器的主要意义在于给 Client 模式下的虚拟机使用，如果在 Server 模式下，则它还有两大用途：一种是在 JDK 1.5 及之前的版本中与 Parallel Scavenge 配合使用，另一种是作为 CMS 收集器的后备预案,在并发收集发生 Concurrent Mode Failure 时使用（后文讲述）,它与 Serial 收集器配合使用示意图如下</p>
+<img src="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/3.png" class title="s">
+
+<h4 id="Parallel-Old-收集器"><a href="#Parallel-Old-收集器" class="headerlink" title="Parallel Old 收集器"></a>Parallel Old 收集器</h4><p>Parallel Old 是相对于 Parallel Scavenge 收集器的老年代版本，使用多线程和标记整理法，两者组合示意图如下,这两者的组合由于都是多线程收集器，真正实现了「吞吐量优先」的目标</p>
+<img src="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/4.png" class title="s">
+
+<h4 id="CMS-收集器"><a href="#CMS-收集器" class="headerlink" title="CMS 收集器"></a>CMS 收集器</h4><p>CMS 收集器是以实现最短 STW 时间为目标的收集器，如果应用很重视服务的响应速度，希望给用户最好的体验，则 CMS 收集器是个很不错的选择！</p>
+<p>我们之前说老年代主要用标记整理法，而 CMS 虽然工作于老年代，但采用的是标记清除法，主要有以下四个步骤</p>
+<ol>
+<li>初始标记</li>
+<li>并发标记</li>
+<li>重新标记</li>
+<li>并发清除</li>
+</ol>
+<img src="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/5.png" class title="s">
+
+<p>从图中可以的看到初始标记和重新标记两个阶段会发生 STW，造成用户线程挂起，不过初始标记仅标记 GC Roots 能关联的对象，速度很快，并发标记是进行 GC Roots  Tracing 的过程，重新标记是为了修正并发标记期间因用户线程继续运行而导致标记产生变动的那一部分对象的标记记录，这一阶段停顿时间一般比初始标记阶段稍长，但<strong>远比并发标记时间短</strong>。</p>
+<p>整个过程中耗时最长的是并发标记和标记清理，不过这两个阶段用户线程都可工作，所以不影响应用的正常使用，所以总体上看，可以认为 CMS 收集器的内存回收过程是与用户线程一起并发执行的。</p>
+<p>但是 CMS 收集器远达不到完美的程度，主要有以下三个缺点</p>
+<ul>
+<li>CMS 收集器对 CPU 资源非常敏感  原因也可以理解，比如本来我本来可以有 10 个用户线程处理请求，现在却要分出 3 个作为回收线程，吞吐量下降了30%，CMS 默认启动的回收线程数是 （CPU数量+3）/ 4, 如果 CPU 数量只有一两个，那吞吐量就直接下降 50%,显然是不可接受的</li>
+<li>CMS 无法处理浮动垃圾（Floating Garbage）,可能出现 「Concurrent Mode Failure」而导致另一次 Full GC 的产生，由于在并发清理阶段用户线程还在运行，所以清理的同时新的垃圾也在不断出现，这部分垃圾只能在下一次 GC 时再清理掉（即浮云垃圾），同时在垃圾收集阶段用户线程也要继续运行，就需要预留足够多的空间要确保用户线程正常执行，这就意味着 CMS 收集器不能像其他收集器一样等老年代满了再使用，JDK 1.5 默认当老年代使用了68%空间后就会被激活，当然这个比例可以通过 -XX:CMSInitiatingOccupancyFraction 来设置，但是如果设置地太高很容易导致在 CMS 运行期间预留的内存无法满足程序要求，会导致 <strong>Concurrent Mode Failure</strong> 失败，这时会启用 Serial Old 收集器来重新进行老年代的收集，而我们知道 Serial Old 收集器是单线程收集器，这样就会导致 STW 更长了。</li>
+<li>CMS 采用的是标记清除法，上文我们已经提到这种方法会产生大量的内存碎片，这样会给大内存分配带来很大的麻烦，如果无法找到足够大的连续空间来分配对象，将会触发 Full GC，这会影响应用的性能。当然我们可以开启 -XX:+UseCMSCompactAtFullCollection（默认是开启的），用于在 CMS 收集器顶不住要进行 FullGC 时开启内存碎片的合并整理过程，内存整理会导致 STW，停顿时间会变长，还可以用另一个参数 -XX:CMSFullGCsBeforeCompation 用来设置执行多少次不压缩的 Full GC 后跟着带来一次带压缩的。</li>
+</ul>
+<h4 id="G1（Garbage-First）-收集器"><a href="#G1（Garbage-First）-收集器" class="headerlink" title="G1（Garbage First） 收集器"></a>G1（Garbage First） 收集器</h4><p>G1 收集器是面向服务端的垃圾收集器，被称为驾驭一切的垃圾回收器，主要有以下几个特点</p>
+<ul>
+<li>像 CMS 收集器一样，能与应用程序线程并发执行。</li>
+<li>整理空闲空间更快。</li>
+<li>需要 GC 停顿时间更好预测。</li>
+<li>不会像 CMS 那样牺牲大量的吞吐性能。</li>
+<li>不需要更大的 Java Heap</li>
+</ul>
+<p>与 CMS 相比，它在以下两个方面表现更出色</p>
+<ol>
+<li>运作期间不会产生内存碎片，G1 从整体上看采用的是标记-整理法，局部（两个 Region）上看是基于复制算法实现的，两个算法都不会产生内存碎片，收集后提供规整的可用内存，这样有利于程序的长时间运行。</li>
+<li>在 STW 上建立了<strong>可预测</strong>的停顿时间模型，用户可以指定期望停顿时间，G1 会将停顿时间控制在用户设定的停顿时间以内。</li>
+</ol>
+<p>为什么G1能建立可预测的停顿模型呢，主要原因在于 G1 对堆空间的分配与传统的垃圾收集器不一器，传统的内存分配就像我们前文所述，是连续的，分成新生代，老年代，新生代又分 Eden,S0,S1,如下</p>
+<img src="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/6.png" class title="s">
+
+<p>而 G1 各代的存储地址不是连续的，每一代都使用了 n 个不连续的大小相同的 Region，每个Region占有一块连续的虚拟内存地址，如图示</p>
+<img src="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/7.png" class title="s">
+
+<p>除了和传统的新老生代，幸存区的空间区别，Region还多了一个H，它代表Humongous，这表示这些Region存储的是巨大对象（humongous object，H-obj），即大小大于等于region一半的对象，这样超大对象就直接分配到了老年代，防止了反复拷贝移动。那么 G1 分配成这样有啥好处呢？</p>
+<p>传统的收集器如果发生 Full GC 是对整个堆进行全区域的垃圾收集，而分配成各个 Region 的话，方便 G1 跟踪各个 Region 里垃圾堆积的价值大小（回收所获得的空间大小及回收所需经验值），这样根据价值大小维护一个优先列表，根据允许的收集时间，优先收集回收价值最大的 Region,也就避免了整个老年代的回收，也就减少了 STW 造成的停顿时间。同时由于只收集部分 Region,可就做到了 STW 时间的可控。</p>
+<p>G1 收集器的工作步骤如下</p>
+<ol>
+<li>初始标记</li>
+<li>并发标记</li>
+<li>最终标记</li>
+<li>筛选回收</li>
+</ol>
+<img src="/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/8.png" class title="s">
+
+<p>可以看到整体过程与 CMS 收集器非常类似，筛选阶段会根据各个 Region 的回收价值和成本进行排序，根据用户期望的 GC 停顿时间来制定回收计划。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文简述了垃圾回收的原理与垃圾收集器的种类，相信大家对开头提的一些问题应该有了更深刻的认识，在生产环境中我们要根据<strong>不同的场景</strong>来选择垃圾收集器组合，如果是运行在桌面环境处于 Client 模式的，则用 Serial + Serial Old 收集器绰绰有余，如果需要响应时间快，用户体验好的，则用 ParNew + CMS 的搭配模式，即使是号称是「驾驭一切」的 G1，也需要根据吞吐量等要求适当调整相应的 JVM 参数，没有最牛的技术，只有最合适的使用场景，切记！</p>
+<p>理论有了，下一篇我们会进入手动操作环节，我们会一起来动手操作一些 demo，做一些实验，来验证我们看到的一些现象，比如对象一般分配在新生代，什么情况下会直接到老年代，该怎么实验？发生了OOM，该用哪些工具调试呢？等等，敬请期待！</p>
+<p>参考</p>
+<p>堆外内存的回收机制分析 <a href="https://www.jianshu.com/p/35cf0f348275" target="_blank" rel="noopener">https://www.jianshu.com/p/35cf0f348275</a> </p>
+<p>java调用本地方法–jni简介 <a href="https://blog.csdn.net/w1992wishes/article/details/80283403" target="_blank" rel="noopener">https://blog.csdn.net/w1992wishes/article/details/80283403</a> </p>
+<p>咱们从头到尾说一次 Java 垃圾回收 <a href="https://mp.weixin.qq.com/s/pR7U1OTwsNSg5fRyWafucA" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/pR7U1OTwsNSg5fRyWafucA</a> </p>
+<p>深入理解 Java 虚拟机 </p>
+<p>Java Hotspot G1 GC的一些关键技术 <a href="https://tech.meituan.com/2016/09/23/g1.html" target="_blank" rel="noopener">https://tech.meituan.com/2016/09/23/g1.html</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/05/26/JVM%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/" data-id="ckanpw82i0000m8ug3s24gnsu" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/" rel="tag">JVM</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-TCP" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/05/26/TCP/" class="article-date">
@@ -768,200 +889,6 @@
 
 
   
-    <article id="post-spring模块划分" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/05/01/spring%E6%A8%A1%E5%9D%97%E5%88%92%E5%88%86/" class="article-date">
-  <time datetime="2020-05-01T06:09:09.000Z" itemprop="datePublished">2020-05-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/05/01/spring%E6%A8%A1%E5%9D%97%E5%88%92%E5%88%86/">spring-framework模块划分</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p><a href="https://github.com/spring-projects/spring-framework">spring-frame官方仓库</a></p>
-<p><a href="https://spring.io/" target="_blank" rel="noopener">spring官网</a></p>
-<p><a href="https://www.cnblogs.com/MrZhouZ/p/11530578.html" target="_blank" rel="noopener">Spring框架的前世今生与系统架构</a></p>
-</blockquote>
-<h2 id="spring-framework总览"><a href="#spring-framework总览" class="headerlink" title="spring-framework总览"></a>spring-framework总览</h2><p>spring-framework官方仓库中把spring的一些功能进行了拆解，分在不同模块中。这里就简单总结一下每个模块的作用，对spring-framework有一个总体上的认识。</p>
-<p>首先来看一下spring-framework的整个架构：</p>
-<img src="/2020/05/01/spring%E6%A8%A1%E5%9D%97%E5%88%92%E5%88%86/1.png" class title="spring-framework模块">
-
-
-
-<p>可以看到官方仓库把spring-framework分成了21个模块，让开发者可以按需引入。</p>
-<img src="/2020/05/01/spring%E6%A8%A1%E5%9D%97%E5%88%92%E5%88%86/2.png" class title="spring-framework模块">
-
-
-
-<h2 id="分模块简介"><a href="#分模块简介" class="headerlink" title="分模块简介"></a>分模块简介</h2><p>接下来对各个模块进行一些最简单的介绍</p>
-<table>
-<thead>
-<tr>
-<th>序号</th>
-<th>模块名</th>
-<th>作用简介</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>1</td>
-<td>spring-aop</td>
-<td>给spring-frame提供aop的支持，也就是面向切面的编程的能力。</td>
-</tr>
-<tr>
-<td>2</td>
-<td>spring-aspects</td>
-<td>spring-aspects 模块集成自 AspectJ 框架，主要是为 Spring AOP 提供多种 AOP 实现方法。</td>
-</tr>
-<tr>
-<td>3</td>
-<td>spring-beans</td>
-<td><strong>核心模块</strong>。beans包的核心功能就是对Bean对象生命周期的管理，包含Bean的定义、解析和创建等。</td>
-</tr>
-<tr>
-<td>4</td>
-<td>spring-context-indexer</td>
-<td>spring-context-indexer 模块是 Spring 的类管理组件和 Classpath 扫描。</td>
-</tr>
-<tr>
-<td>5</td>
-<td>spring-context-support</td>
-<td>spring-context-support 模块是对 Spring IOC 容器的扩展支持，以及 IOC 子容器。</td>
-</tr>
-<tr>
-<td>6</td>
-<td>spring-context</td>
-<td><strong>核心模块</strong>。spring-context 模块构架于核心模块之上，扩展了 BeanFactory，为她添加了 Bean 生命周期控制、框架事件体系以及资源加载透明化等功能。</td>
-</tr>
-<tr>
-<td>7</td>
-<td>spring-core</td>
-<td><strong>核心模块</strong>。core模块的功能实现的反向控制与依赖注入、Bean配置与加载。</td>
-</tr>
-<tr>
-<td>8</td>
-<td>spring-expression</td>
-<td><strong>核心模块</strong>。又称SpEL，spring-expression 模块是统一表达式语言（EL）的扩展模块，可以查询、管理运行中的对象，同时也方便的可以调用对象方法、操作数组、集合等。</td>
-</tr>
-<tr>
-<td>9</td>
-<td>spring-instrument</td>
-<td>spring-instrument 模块是基于 JAVA SE 中的”java.lang.instrument”进行设计的，应该算是 AOP的一个支援模块。</td>
-</tr>
-<tr>
-<td>10</td>
-<td>spring-jcl</td>
-<td>spring-jcl模这个模块是spring源码里最基础的模块没有依赖其他模块，它是为了兼容不同版本的日志系统。</td>
-</tr>
-<tr>
-<td>11</td>
-<td>spring-jdbc</td>
-<td>spring-jdbc 模块是 Spring 提供的 JDBC 抽象框架的主要实现模块，用于简化 Spring JDBC 操作 。</td>
-</tr>
-<tr>
-<td>12</td>
-<td>spring-jms</td>
-<td>spring-jms 模块（Java Messaging Service）能够发送和接收信息。</td>
-</tr>
-<tr>
-<td>13</td>
-<td>spring-messaging</td>
-<td>即 spring-messaging 模块，是从 Spring4 开始新加入的一个模块，主要职责是为 Spring 框架集成一些基础的报文传送应用。</td>
-</tr>
-<tr>
-<td>14</td>
-<td>spring-orm</td>
-<td>spring-orm 模块是 ORM 框架支持模块，主要集成 Hibernate, Java Persistence API (JPA) 和Java Data Objects (JDO) 用于资源管理、数据访问对象(DAO)的实现和事务策略。</td>
-</tr>
-<tr>
-<td>15</td>
-<td>spring-oxm</td>
-<td>spring-oxm 模块主要提供一个抽象层以支撑 OXM（OXM 是 Object-to-XML-Mapping 的缩写，它是一个 O/M-mapper，将 java 对象映射成 XML 数据，或者将 XML 数据映射成 java 对象）</td>
-</tr>
-<tr>
-<td>16</td>
-<td>spring-test</td>
-<td>spring-test 模块，主要为测试提供支持的。</td>
-</tr>
-<tr>
-<td>17</td>
-<td>spring-tx</td>
-<td>spring-tx 模块是 Spring JDBC 事务控制实现模块。</td>
-</tr>
-<tr>
-<td>18</td>
-<td>spring-web</td>
-<td>spring-web 模块为 Spring 提供了最基础 Web 支持。</td>
-</tr>
-<tr>
-<td>19</td>
-<td>spring-webflux</td>
-<td>spring-webflux 是一个新的非堵塞函数式 Reactive Web 框架。</td>
-</tr>
-<tr>
-<td>20</td>
-<td>spring-webmvc</td>
-<td>spring-webmvc 模块众所周知是一个的 Web-Servlet 模块，实现了 Spring MVC。</td>
-</tr>
-<tr>
-<td>21</td>
-<td>spring-webscoket</td>
-<td>spring-websocket 模块主要是与 Web 前端的全双工通讯的协议。</td>
-</tr>
-</tbody></table>
-<h2 id="模块间的配合"><a href="#模块间的配合" class="headerlink" title="模块间的配合"></a>模块间的配合</h2><p>回顾一下上面的架构图</p>
-<img src="/2020/05/01/spring%E6%A8%A1%E5%9D%97%E5%88%92%E5%88%86/1.png" class title="spring-frame模块">
-
-<h3 id="核心容器"><a href="#核心容器" class="headerlink" title="核心容器"></a>核心容器</h3><p>由spring-beans、spring-core、spring-context和spring-expression（Spring Expression Language,SpEL） 4 个模块组成。</p>
-<p><strong>spring-core</strong> 和 spring-beans 模块是 Spring 框架的核心模块，包含了控制反转（Inversion of Control, IOC）和依赖注入（Dependency Injection, DI）。BeanFactory 接口是 Spring 框架中的核心接口，它是工厂模式的具体实现。BeanFactory 使用控制反转对应用程序的配置和依赖性规范与实际的应用程序代码进行了分离。但 BeanFactory 容器实例化后并不会自动实例化 Bean，只有当 Bean 被使用时 BeanFactory 容器才会对该 Bean 进行实例化与依赖关系的装配。</p>
-<p><strong>spring-context</strong> 模块构架于核心模块之上，他扩展了 BeanFactory，为她添加了 Bean 生命周期控制、框架事件体系以及资源加载透明化等功能。此外该模块还提供了许多企业级支持，如邮件访问、远程访问、任务调度等，ApplicationContext 是该模块的核心接口，她的超类是 BeanFactory。与BeanFactory 不同，pplicationContext 容器实例化后会自动对所有的单实例 Bean 进行实例化与依赖关系的装配，使之处于待用状态。</p>
-<p><strong>spring-context-support</strong> 模块是对 Spring IOC 容器的扩展支持，以及 IOC 子容器。spring-context-indexer 模块是 Spring 的类管理组件和 Classpath 扫描。</p>
-<p><strong>spring-expression</strong>模块是统一表达式语言（EL）的扩展模块，可以查询、管理运行中的对象，同时也方便的可以调用对象方法、操作数组、集合等。它的语法类似于传统 EL，但提供了额外的功能，最出色的要数函数调用和简单字符串的模板函数。这种语言的特性是基于 Spring 产品的需求而设计，他可以非常方便地同 Spring IOC 进行交互。 </p>
-<h3 id="AOP和设备支持"><a href="#AOP和设备支持" class="headerlink" title="AOP和设备支持"></a>AOP和设备支持</h3><p>由 spring-aop、spring-aspects 和 spring-instrument 3 个模块组成。</p>
-<p><strong>spring-aop</strong> 是 Spring 的另一个核心模块，是 AOP 主要的实现模块。作为继 OOP 后，对程序员影响最大的编程思想之一，AOP 极大地开拓了人们对于编程的思路。在 Spring 中，他是以 JVM 的动态代理技术为基础，然后设计出了一系列的 AOP 横切实现，比如前置通知、返回通知、异常通知等，同时，Pointcut 接口来匹配切入点，可以使用现有的切入点来设计横切面，也可以扩展相关方法根据需求进行切入。</p>
-<p><strong>spring-aspects</strong> 模块集成自 AspectJ 框架，主要是为 Spring AOP 提供多种 AOP 实现方法。</p>
-<p><strong>spring-instrument</strong>模块是基于 JAVA SE 中的”java.lang.instrument”进行设计的，应该算是 AOP的一个支援模块，主要作用是在 JVM 启用时，生成一个代理类，程序员通过代理类在运行时修改类的字节，从而改变一个类的功能，实现 AOP 的功能。在分类里，我把他分在了 AOP 模块下，在 Spring 官方文档里对这个地方也有点含糊不清，这里是纯个人观点。</p>
-<h3 id="数据访问与集成"><a href="#数据访问与集成" class="headerlink" title="数据访问与集成"></a>数据访问与集成</h3><p>由 spring-jdbc、spring-tx、spring-orm、spring-jms 和 spring-oxm 5 个模块组成。</p>
-<p><strong>spring-jdbc</strong> 模块是 Spring 提供的 JDBC 抽象框架的主要实现模块，用于简化 Spring JDBC 操作 。主要是提供 JDBC 模板方式、关系数据库对象化方式、SimpleJdbc 方式、事务管理来简化 JDBC 编程，主要实现类是 JdbcTemplate、SimpleJdbcTemplate 以及 NamedParameterJdbcTemplate。</p>
-<p><strong>spring-tx</strong> 模块是 Spring JDBC 事务控制实现模块。使用 Spring 框架，它对事务做了很好的封装，通过它的 AOP 配置，可以灵活的配置在任何一层；但是在很多的需求和应用，直接使用 JDBC 事务控制还是有其优势的。其实，事务是以业务逻辑为基础的；一个完整的业务应该对应业务层里的一个方法；如果业务操作失败，则整个事务回滚；所以，事务控制是绝对应该放在业务层的；但是，持久层的设计则应该遵循一个很重要的原则：保证操作的原子性，即持久层里的每个方法都应该是不可以分割的。所以，在使用 Spring JDBC 事务控制时，应该注意其特殊性。</p>
-<p><strong>spring-orm</strong>模块是 ORM 框架支持模块，主要集成 Hibernate, Java Persistence API (JPA) 和Java Data Objects (JDO) 用于资源管理、数据访问对象(DAO)的实现和事务策略。</p>
-<p><strong>spring-oxm</strong> 模块主要提供一个抽象层以支撑 OXM（OXM 是 Object-to-XML-Mapping 的缩写，它是一个 O/M-mapper，将 java 对象映射成 XML 数据，或者将 XML 数据映射成 java 对象），例如：JAXB, Castor, XMLBeans, JiBX 和 XStream 等。</p>
-<p><strong>spring-jms</strong>模块（Java Messaging Service）能够发送和接收信息，自 Spring Framework 4.1 以后，他还提供了对 spring-messaging 模块的支撑。 </p>
-<h3 id="Web组件"><a href="#Web组件" class="headerlink" title="Web组件"></a>Web组件</h3><p>由 spring-web、spring-webmvc、spring-websocket 和 spring-webflux 4 个模块组成。</p>
-<p><strong>spring-web</strong>模块为 Spring 提供了最基础 Web 支持，主要建立于核心容器之上，通过 Servlet 或者 Listeners 来初始化 IOC 容器，也包含一些与 Web 相关的支持。</p>
-<p><strong>spring-webmvc</strong>模块众所周知是一个的 Web-Servlet 模块，实现了 Spring MVC（model-view-Controller）的 Web 应用。</p>
-<p><strong>spring-websocket</strong>模块主要是与 Web 前端的全双工通讯的协议。</p>
-<p><strong>spring-webflux</strong>是一个新的非堵塞函数式 Reactive Web 框架，可以用来建立异步的，非阻塞，事件驱动的服务，并且扩展性非常好。 </p>
-<h3 id="通信报文"><a href="#通信报文" class="headerlink" title="通信报文"></a>通信报文</h3><p><strong>spring-messaging</strong> 模块，是从 Spring4 开始新加入的一个模块，主要职责是为 Spring 框架集成一些基础的报文传送应用。 </p>
-<h3 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h3><p><strong>spring-test</strong> 模块，主要为测试提供支持的，毕竟在不需要发布（程序）到你的应用服务器或者连接到其他企业设施的情况下能够执行一些集成测试或者其他测试对于任何企业都是非常重要的。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://github.com/liqiang1127/2020/05/01/spring%E6%A8%A1%E5%9D%97%E5%88%92%E5%88%86/" data-id="ck9qswfqq001y2cugffoa37u1" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -990,7 +917,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 12px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 14px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
     </div>
   </div>
 
@@ -1012,6 +939,10 @@
       <ul>
         
           <li>
+            <a href="/2020/06/22/synchronized%E5%92%8CLock%E5%AD%B0%E4%BC%98%E5%AD%B0%E5%8A%A3%EF%BC%8C%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%EF%BC%9F/">synchronized和Lock孰优孰劣，如何选择？</a>
+          </li>
+        
+          <li>
             <a href="/2020/06/19/%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%81%9C%E6%AD%A2%E7%BA%BF%E7%A8%8B%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8volatile%E6%A0%87%E8%AE%B0%E4%BD%8D%E7%9A%84%E6%96%B9%E6%B3%95%E6%98%AF%E9%94%99%E8%AF%AF%E7%9A%84%EF%BC%9F/">如何正确停止线程？为什么用volatile标记位的方法是错误的？</a>
           </li>
         
@@ -1025,10 +956,6 @@
         
           <li>
             <a href="/2020/06/12/ConcurrentHashMap%E5%92%8CHashTable/">ConcurrentHashMap和HashTable</a>
-          </li>
-        
-          <li>
-            <a href="/2020/06/10/Mybatis%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6/">Mybatis核心组件</a>
           </li>
         
       </ul>
