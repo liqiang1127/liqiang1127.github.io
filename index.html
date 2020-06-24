@@ -71,6 +71,106 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-applicationContext中的Refresh-方法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/06/24/applicationContext%E4%B8%AD%E7%9A%84Refresh-%E6%96%B9%E6%B3%95/" class="article-date">
+  <time datetime="2020-06-24T08:41:41.000Z" itemprop="datePublished">2020-06-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/06/24/applicationContext%E4%B8%AD%E7%9A%84Refresh-%E6%96%B9%E6%B3%95/">applicationContext中的Refresh()方法</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h2><p><strong>refresh()</strong>，该方法是 Spring Bean 加载的核心，在AnnotationConfigApplicationContext的构造函数中就会调用这个方法。它是 AnnotationConfigApplicationContext的父类 AbstractApplicationContext 的一个方法 ， 顾名思义，用于刷新整个Spring 上下文信息，定义了整个 Spring 上下文加载的流程。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">AnnotationConfigApplicationContext</span><span class="params">(Class&lt;?&gt;... componentClasses)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">this</span>();</span><br><span class="line">	register(componentClasses);</span><br><span class="line">	refresh();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这么牛逼的方法源码很是简洁，在refresh()基本都是调用其他方法，备注也很齐全，所以一眼看上去就知道Spring刷新上下文的整个流程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">refresh</span><span class="params">()</span> <span class="keyword">throws</span> BeansException, IllegalStateException </span>&#123;</span><br><span class="line">		<span class="keyword">synchronized</span> (<span class="keyword">this</span>.startupShutdownMonitor) &#123;</span><br><span class="line">			<span class="comment">// Prepare this context for refreshing.</span></span><br><span class="line">            <span class="comment">// 为刷新准备上下文</span></span><br><span class="line">			prepareRefresh();</span><br><span class="line"></span><br><span class="line">			<span class="comment">// Tell the subclass to refresh the internal bean factory.</span></span><br><span class="line">            <span class="comment">// 让子类去创建和初始化 BeanFactory</span></span><br><span class="line">			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();</span><br><span class="line"></span><br><span class="line">			<span class="comment">// Prepare the bean factory for use in this context.</span></span><br><span class="line">            <span class="comment">// 填充BeanFactory的功能</span></span><br><span class="line">			prepareBeanFactory(beanFactory);</span><br><span class="line"></span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="comment">// Allows post-processing of the bean factory in context subclasses.</span></span><br><span class="line">                <span class="comment">// 提供子类覆盖的额外处理，即子类自定义的BeanFactoryPostProcess</span></span><br><span class="line">				postProcessBeanFactory(beanFactory);</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Invoke factory processors registered as beans in the context.</span></span><br><span class="line">                <span class="comment">// 激活各种BeanFacytory处理器</span></span><br><span class="line">				invokeBeanFactoryPostProcessors(beanFactory);</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Register bean processors that intercept bean creation.</span></span><br><span class="line">                <span class="comment">//注册拦截Bean创建的Bean处理器，这里只是注册，真正的调用实在getBean时候，BeanPostProcessor</span></span><br><span class="line">				registerBeanPostProcessors(beanFactory);</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Initialize message source for this context.</span></span><br><span class="line">                <span class="comment">// 初始化上下文资源文件，如国际化的处理等</span></span><br><span class="line">				initMessageSource();</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Initialize event multicaster for this context.</span></span><br><span class="line">                <span class="comment">// 初始化上下文事件广播器</span></span><br><span class="line">				initApplicationEventMulticaster();</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Initialize other special beans in specific context subclasses.</span></span><br><span class="line">                <span class="comment">// 留给子类来初始化其它的Bean </span></span><br><span class="line">				onRefresh();</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Check for listener beans and register them.</span></span><br><span class="line">                <span class="comment">// 在所有的bean中查找listener bean，然后注册到广播器中</span></span><br><span class="line">				registerListeners();</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Instantiate all remaining (non-lazy-init) singletons.</span></span><br><span class="line">                <span class="comment">// 初始化剩下的单例bean</span></span><br><span class="line">				finishBeanFactoryInitialization(beanFactory);</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Last step: publish corresponding event.</span></span><br><span class="line">                <span class="comment">// 完成刷新过程，通知生命周期处理器lifeCycleProcessor刷新过程，同时发出ContextRefreshEvent通知别人</span></span><br><span class="line">				finishRefresh();</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">catch</span> (BeansException ex) &#123;</span><br><span class="line">				<span class="keyword">if</span> (logger.isWarnEnabled()) &#123;</span><br><span class="line">					logger.warn(<span class="string">"Exception encountered during context initialization - "</span> +</span><br><span class="line">							<span class="string">"cancelling refresh attempt: "</span> + ex);</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Destroy already created singletons to avoid dangling resources.</span></span><br><span class="line">				<span class="comment">// 销毁已经创建的bean</span></span><br><span class="line">                destroyBeans();</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Reset 'active' flag.</span></span><br><span class="line">                <span class="comment">// 重置容器激活标签</span></span><br><span class="line">				cancelRefresh(ex);</span><br><span class="line"></span><br><span class="line">				<span class="comment">// Propagate exception to caller.</span></span><br><span class="line">				<span class="keyword">throw</span> ex;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">finally</span> &#123;</span><br><span class="line">				<span class="comment">// Reset common introspection caches in Spring's core, since we</span></span><br><span class="line">				<span class="comment">// might not ever need metadata for singleton beans anymore...</span></span><br><span class="line">				resetCommonCaches();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="简单整理"><a href="#简单整理" class="headerlink" title="简单整理"></a>简单整理</h2><table>
+<thead>
+<tr>
+<th>函数</th>
+<th align="left">解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1.prepareRrefresh()</td>
+<td align="left">初始化上下文环境，对系统的环境变量或系统属性进行准备和校验，如环境变量中必须设置某个值才能运行，否则就不行，这时候可以在这里加一个校验，重写initPropertySources方法就好。</td>
+</tr>
+<tr>
+<td>2.obtainFreshBeanFactory()</td>
+<td align="left">创建并初始化bean</td>
+</tr>
+<tr>
+<td>3.prepareBeanFactory(beanFactory)</td>
+<td align="left">填充BeanFactory的功能</td>
+</tr>
+<tr>
+<td>4.postProcessBeanFactory()</td>
+<td align="left">提供覆盖子类的额外处理，即子类处理自定义的BeanFactoryPostProcess</td>
+</tr>
+<tr>
+<td>5.invokeBeanFactoryPostProcessor()</td>
+<td align="left">激活各种BeanFactory处理器</td>
+</tr>
+<tr>
+<td>6.registerBeanPostProcessors()</td>
+<td align="left">注册拦截Bean创建的Bean处理器，即注册BeanPostProcessor</td>
+</tr>
+<tr>
+<td>7.initMessageSource()</td>
+<td align="left">初始化上下文中的资源文件，如国际化文件的处理等</td>
+</tr>
+<tr>
+<td>8.initApplicationEventMulticaster()</td>
+<td align="left">初始化上下文广播器</td>
+</tr>
+<tr>
+<td>9.onRefresh()</td>
+<td align="left">预留给子类拓展初始化其他Bean</td>
+</tr>
+<tr>
+<td>10.registerListeners()</td>
+<td align="left">在所有bean中查找listener bean，然后注册到广播器中</td>
+</tr>
+<tr>
+<td>11.finishBeanFactoryInitialization(beanFactory)</td>
+<td align="left">初始化剩下的单例bean(非延迟加载的)</td>
+</tr>
+<tr>
+<td>12.finishRefresh()</td>
+<td align="left">完成刷新过程，通知生命周期处理器lifecycleProcessor刷新过程，同时发出ContextRefreshEvent通知别人</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/06/24/applicationContext%E4%B8%AD%E7%9A%84Refresh-%E6%96%B9%E6%B3%95/" data-id="ckbtawyhq0000n8ug81arb704" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-阻塞队列存取方法区别大总结" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/06/23/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E5%AD%98%E5%8F%96%E6%96%B9%E6%B3%95%E5%8C%BA%E5%88%AB%E5%A4%A7%E6%80%BB%E7%BB%93/" class="article-date">
@@ -918,47 +1018,6 @@
 
 
   
-    <article id="post-适配器模式和装饰器模式" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/05/28/%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F/" class="article-date">
-  <time datetime="2020-05-28T07:30:01.000Z" itemprop="datePublished">2020-05-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/05/28/%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F/">适配器模式、装饰者模式和代理模式</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="1-适配器模式"><a href="#1-适配器模式" class="headerlink" title="1.适配器模式"></a>1.适配器模式</h2><p>适配器模式的功能很好理解，就是把一个类的接口变成客户端所能接受的另一种接口，从使两个接口不匹配而无法在一起工作的类能在一起工作。<strong>说白了，适配器模式会产生新的接口</strong>。</p>
-<h2 id="2-装饰器模式"><a href="#2-装饰器模式" class="headerlink" title="2.装饰器模式"></a>2.装饰器模式</h2><p>装饰器模式，顾名思义，就是将某个类重新装扮一下，使得它比原来更”漂亮“，或者功能上更加强大，这就是装饰器模式需要达到的目的。但是作为使用者还不应该感受到装饰前和装饰后，有什么不同，否则就破坏了类原有的结构了，所以装饰器模式要做到对被装饰类的使用者透明，这是对装饰器的一个要求。<strong>装饰器模式要在保留原有的接口的基础上进行功能上的增强。</strong></p>
-<h2 id="3-代理模式"><a href="#3-代理模式" class="headerlink" title="3.代理模式"></a>3.代理模式</h2><p>代理模式和装饰器模式比较相似，不过它们的倾向性不同，让别人帮助你做你并不关心的事情，叫<strong>代理模式</strong>。为让自己的能力增强，使得增强后的自己能够使用更多的方法，拓展在自己基础之上的功能的，叫<strong>装饰器模式</strong></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://github.com/liqiang1127/2020/05/28/%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F%E5%92%8C%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F/" data-id="ckaqh61as0000ywug4d93hgn8" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag">设计模式</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -987,7 +1046,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 14px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 16px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 14px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
     </div>
   </div>
 
@@ -1009,6 +1068,10 @@
       <ul>
         
           <li>
+            <a href="/2020/06/24/applicationContext%E4%B8%AD%E7%9A%84Refresh-%E6%96%B9%E6%B3%95/">applicationContext中的Refresh()方法</a>
+          </li>
+        
+          <li>
             <a href="/2020/06/23/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E5%AD%98%E5%8F%96%E6%96%B9%E6%B3%95%E5%8C%BA%E5%88%AB%E5%A4%A7%E6%80%BB%E7%BB%93/">阻塞队列存取方法区别大总结</a>
           </li>
         
@@ -1022,10 +1085,6 @@
         
           <li>
             <a href="/2020/06/19/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E5%8F%AA%E6%9C%89%E4%B8%80%E7%A7%8D%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%9F/">为什么说只有一种实现线程的方式？</a>
-          </li>
-        
-          <li>
-            <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
           </li>
         
       </ul>

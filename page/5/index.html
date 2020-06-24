@@ -71,6 +71,61 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-15-三数之和" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/03/15/15-%E4%B8%89%E6%95%B0%E4%B9%8B%E5%92%8C/" class="article-date">
+  <time datetime="2020-03-15T11:08:20.000Z" itemprop="datePublished">2020-03-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/15/15-%E4%B8%89%E6%95%B0%E4%B9%8B%E5%92%8C/">15.三数之和</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。</p>
+<p><strong>注意</strong>：答案中不可以包含重复的三元组。</p>
+<p><a href="https://leetcode-cn.com/problems/3sum" target="_blank" rel="noopener">传送门</a></p>
+<blockquote>
+<p>定数组 nums = [-1, 0, 1, 2, -1, -4]，<br>满足要求的三元组集合为：<br><br>[[-1, 0, 1],<br>[-1, -1, 2]]</p>
+</blockquote>
+<h3 id="分析一下"><a href="#分析一下" class="headerlink" title="分析一下"></a>分析一下</h3><p>这题挺简单的，先排个序。固定一个数字，然后用双指针分别从前后找组合。</p>
+<p><strong>考点</strong>：双指针</p>
+<p><strong>重点</strong>：去重</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> List&lt;List&lt;Integer&gt;&gt; threeSum(<span class="keyword">int</span>[] nums) &#123;</span><br><span class="line">        Arrays.sort(nums);</span><br><span class="line">        List&lt;List&lt;Integer&gt;&gt; ans = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (nums[i] &gt; <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">if</span>(i &gt; <span class="number">0</span> &amp;&amp; nums[i] == nums[i-<span class="number">1</span>]) <span class="keyword">continue</span>; <span class="comment">// 去重</span></span><br><span class="line">            <span class="keyword">int</span> a = nums[i];</span><br><span class="line">            <span class="keyword">int</span> l = i+<span class="number">1</span>, r = nums.length-<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">while</span> (l &lt; r)&#123;</span><br><span class="line">                <span class="keyword">int</span> sum = a + nums[l] + nums[r];</span><br><span class="line">                <span class="keyword">if</span> (sum == <span class="number">0</span>)&#123;</span><br><span class="line">                    List&lt;Integer&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">                    list.add(a);</span><br><span class="line">                    list.add(nums[l++]);</span><br><span class="line">                    list.add(nums[r--]);</span><br><span class="line">                    ans.add(list);</span><br><span class="line">                    <span class="keyword">while</span> (l&lt;r &amp;&amp; nums[l] == nums[l-<span class="number">1</span>]) l++; <span class="comment">// 去重</span></span><br><span class="line">                    <span class="keyword">while</span> (l&lt;r &amp;&amp; nums[r] == nums[r+<span class="number">1</span>]) r--; <span class="comment">// 去重</span></span><br><span class="line">                &#125;<span class="keyword">else</span> <span class="keyword">if</span>(sum &gt; <span class="number">0</span>)&#123;</span><br><span class="line">                    r --;</span><br><span class="line">                &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                    l ++;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="三个地方去重"><a href="#三个地方去重" class="headerlink" title="三个地方去重"></a>三个地方去重</h3><ol>
+<li><p>固定的数字（也就是代码中的<em>a</em>）如果这个和前面考虑过的元素一样，那么直接跳过。因为在考虑之前的元素的时候，肯定已经把当前元素的情况考虑过了。</p>
+</li>
+<li><p>当找到一个组合的时候，<em>l</em>或者<em>r</em>对应的数字如果和之前考虑过的情况一样，那也跳过。此时，<em>a</em>确定，如果<em>l</em>再和之前的一样，那<em>r</em>肯定也一样了，毕竟<em>a+b+c=0</em>，两个都确定了，第三个自然也确定了，那么找到的答案必然是重复答案。</p>
+</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/03/15/15-%E4%B8%89%E6%95%B0%E4%B9%8B%E5%92%8C/" data-id="ck9qswfq200062cug00e8ckuq" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/LeetCode/" rel="tag">LeetCode</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-LeetCode必刷题" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/03/15/LeetCode%E5%BF%85%E5%88%B7%E9%A2%98/" class="article-date">
@@ -582,7 +637,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 14px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 14px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 16px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 14px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
     </div>
   </div>
 
@@ -604,6 +659,10 @@
       <ul>
         
           <li>
+            <a href="/2020/06/24/applicationContext%E4%B8%AD%E7%9A%84Refresh-%E6%96%B9%E6%B3%95/">applicationContext中的Refresh()方法</a>
+          </li>
+        
+          <li>
             <a href="/2020/06/23/%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E5%AD%98%E5%8F%96%E6%96%B9%E6%B3%95%E5%8C%BA%E5%88%AB%E5%A4%A7%E6%80%BB%E7%BB%93/">阻塞队列存取方法区别大总结</a>
           </li>
         
@@ -617,10 +676,6 @@
         
           <li>
             <a href="/2020/06/19/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E5%8F%AA%E6%9C%89%E4%B8%80%E7%A7%8D%E5%AE%9E%E7%8E%B0%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%96%B9%E5%BC%8F%EF%BC%9F/">为什么说只有一种实现线程的方式？</a>
-          </li>
-        
-          <li>
-            <a href="/2020/06/17/b-treeContains/">mysql中3层的B+树能存多少条数据？</a>
           </li>
         
       </ul>
