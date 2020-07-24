@@ -71,6 +71,186 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-HashMap" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/06/09/HashMap/" class="article-date">
+  <time datetime="2020-06-09T11:50:17.000Z" itemprop="datePublished">2020-06-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/06/09/HashMap/">HashMap</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="HashMap总结（问答）"><a href="#HashMap总结（问答）" class="headerlink" title="HashMap总结（问答）"></a>HashMap总结（问答）</h2><blockquote>
+<p> 好了我们开始今天的面试吧，小伙子你了解数据结构中的HashMap么？能跟我聊聊他的结构和底层原理么？</p>
+</blockquote>
+<p>嗯嗯面试官，我知道HashMap是我们非常常用的数据结构，由<strong>数组和链表组合构成</strong>的数据结构。</p>
+<p>大概如下，数组里面每个地方都存了Key-Value这样的实例，在Java7叫Entry在Java8中叫Node。</p>
+<img src="/2020/06/09/HashMap/p1.png" class title="ss">
+
+<p>因为他本身所有的位置都为null，在put插入的时候会根据key的hash去计算一个index值。</p>
+<p>就比如我put（”帅丙“，520），我插入了为”帅丙“的元素，这个时候我们会通过哈希函数计算出插入的位置，计算出来index是2那结果如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hash(<span class="string">"帅丙"</span>) = <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<img src="/2020/06/09/HashMap/p2.png" class title="ss">
+
+<hr>
+<blockquote>
+<p>你提到了还有链表，为啥需要链表，链表又是怎么样子的呢？</p>
+</blockquote>
+<p>我们都知道数组长度是有限的，在有限的长度里面我们使用哈希，哈希本身就存在率性，就是”帅丙“和”丙帅“我们都去hash有一定的概率会一样，就像上面的情况我再次哈希”丙帅“极端情况也会hash到一个值上，那就形成了链表。</p>
+<img src="/2020/06/09/HashMap/p3.png" class title="ss">
+
+<p>每一个节点都会保存自身的hash、key、value、以及下个节点，我看看Node的源码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Node</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Map</span>.<span class="title">Entry</span>&lt;<span class="title">K</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> hash;</span><br><span class="line">        <span class="keyword">final</span> K key;</span><br><span class="line">        V value;</span><br><span class="line">        Node&lt;K,V&gt; next;</span><br><span class="line">        ....</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>说到链表我想问一下，你知道新的Entry节点在插入链表的时候，是怎么插入的么？</p>
+</blockquote>
+<p><strong>Java8之前是头插法</strong>，就是说新来的值会取代原有的值，原有的值就顺推到链表中去，就像上面的例子一样，因为写这个代码的作者认为后来的值被查找的可能性更大一点，提升查找的效率。</p>
+<p>但是，<strong>在Java8之后，都是所用尾部插入了。</strong>(原因是Java7中的头插法在并发情况下会导致rehash的时候成环)</p>
+<p>数组容量是有限的，数据多次插入的，到达一定的数量就会进行扩容，也就是resize。</p>
+<hr>
+<blockquote>
+<p>什么时候resize呢？</p>
+</blockquote>
+<p>有两个因素：</p>
+<ul>
+<li>Capacity：HashMap当前长度。</li>
+<li>LoadFactor：负载因子，默认值0.75f。</li>
+</ul>
+<p>怎么理解呢，就比如当前的容量大小为100，当你存进第76个的时候，判断发现需要进行resize了，那就进行扩容，但是HashMap的扩容也不是简单的扩大点容量这么简单的。</p>
+<hr>
+<blockquote>
+<p>扩容？它是怎么扩容的呢？</p>
+</blockquote>
+<p>分为两步</p>
+<ul>
+<li>扩容：创建一个新的Entry空数组，长度是原数组的2倍。</li>
+<li>ReHash：遍历原Entry数组，把所有的Entry重新Hash到新数组。</li>
+</ul>
+<hr>
+<blockquote>
+<p>为什么要重新Hash呢，直接复制过去不香么？</p>
+</blockquote>
+<p>是因为长度扩大以后，Hash的规则也随之改变。</p>
+<p>Hash的公式—&gt; index = HashCode（Key） &amp; （Length - 1）</p>
+<p>原来长度（Length）是8你位运算出来的值是2 ，新的长度是16你位运算出来的值明显不一样了。</p>
+<p>扩容前：</p>
+<img src="/2020/06/09/HashMap/p4.png" class title="ss">
+
+<p>扩容后:</p>
+<img src="/2020/06/09/HashMap/p5.png" class title="ss">
+
+<hr>
+<blockquote>
+<p>说完扩容机制我们言归正传，为啥之前用头插法，java8之后改成尾插了呢？</p>
+</blockquote>
+<p>我先举个例子吧，我们现在往一个容量大小为2的put两个值，负载因子是0.75是不是我们在put第二个的时候就会进行resize？</p>
+<p>2*0.75 = 1 所以插入第二个就要resize了</p>
+<p>现在我们要在容量为2的容器里面<strong>用不同线程</strong>插入A，B，C，假如我们在resize之前打个短点，那意味着数据都插入了但是还没resize那扩容前可能是这样的。</p>
+<p>我们可以看到链表的指向A-&gt;B-&gt;C</p>
+<p><strong>Tip：A的下一个指针是指向B的</strong></p>
+<img src="/2020/06/09/HashMap/p6.png" class title="ss">
+
+<p>因为resize的赋值方式，也就是使用了<strong>单链表的头插入方式，同一位置上新元素总会被放在链表的头部位置</strong>，在旧数组中同一条Entry链上的元素，通过重新计算索引位置后，有可能被放到了新数组的不同位置上。</p>
+<p>就可能出现下面的情况，大家发现问题没有？</p>
+<p>B的下一个指针指向了A</p>
+<img src="/2020/06/09/HashMap/p7.png" class title="ss">
+
+<p>一旦几个线程都调整完成，就可能出现环形链表</p>
+<img src="/2020/06/09/HashMap/p8.png" class title="ss">
+
+<p>如果这个时候去取值，悲剧就出现了——Infinite Loop。</p>
+<p><strong>使用头插</strong>会改变链表的上的顺序，但是如果<strong>使用尾插</strong>，在扩容时会保持链表元素原本的顺序，就不会出现链表成环的问题了。</p>
+<p>就是说原本是A-&gt;B，在扩容后那个链表还是A-&gt;B</p>
+<img src="/2020/06/09/HashMap/p8.png" class title="ss">
+
+<p>Java7在多线程操作HashMap时可能引起死循环，原因是扩容转移后前后链表顺序倒置，在转移过程中修改了原来链表中节点的引用关系。</p>
+<p>Java8在同样的前提下并不会引起死循环，原因是扩容转移后前后链表顺序不变，保持之前节点的引用关系。</p>
+<hr>
+<blockquote>
+<p>那是不是意味着Java8就可以把HashMap用在多线程中呢？</p>
+</blockquote>
+<p>我认为即使不会出现死循环，但是通过源码看到put/get方法都没有加同步锁，多线程情况最容易出现的就是：无法保证上一秒put的值，下一秒get的时候还是原值，所以线程安全还是无法保证。</p>
+<hr>
+<blockquote>
+<p>那我问你HashMap的默认初始化长度是多少？</p>
+</blockquote>
+<p>我记得我在看源码的时候<strong>初始化大小是16</strong> (实际上hashMap的大小必须是2^n)，这个是因为定位index的时候，避免%操作，而使用&amp;，提高速度。</p>
+<hr>
+<blockquote>
+<p>那为啥用16不用别的呢？</p>
+</blockquote>
+<p>因为在使用不是2的幂的数字的时候，Length-1的值是所有二进制位全为1，这种情况下，index的结果等同于HashCode后几位的值。</p>
+<p>只要输入的HashCode本身分布均匀，Hash算法的结果就是均匀的。</p>
+<p>这是为了<strong>实现均匀分布</strong>。</p>
+<hr>
+<blockquote>
+<p>哟小家伙，知道的确实很多，那我问你个问题，为啥我们重写equals方法的时候需要重写hashCode方法呢？</p>
+<p>你能用HashMap给我举个例子么？</p>
+</blockquote>
+<p>因为在java中，所有的对象都是继承于Object类。Ojbect类中有两个方法equals、hashCode，这两个方法都是用来比较两个对象是否相等的。</p>
+<p>在未重写equals方法我们是继承了object的equals方法，<strong>那里的 equals是比较两个对象的内存地址</strong>，显然我们new了2个对象内存地址肯定不一样</p>
+<ul>
+<li>对于值对象，==比较的是两个对象的值</li>
+<li>对于引用对象，比较的是两个对象的地址</li>
+</ul>
+<p>大家是否还记得我说的HashMap是通过key的hashCode去寻找index的，那index一样就形成链表了，也就是说”帅丙“和”丙帅“的index都可能是2，在一个链表上的。</p>
+<p>我们去get的时候，他就是根据key去hash然后计算出index，找到了2，那我怎么找到具体的”帅丙“还是”丙帅“呢？</p>
+<p><strong>equals</strong>！是的，所以如果我们对equals方法进行了重写，建议一定要对hashCode方法重写，以保证相同的对象返回相同的hash值，不同的对象返回不同的hash值。</p>
+<p>不然一个链表的对象，你哪里知道你要找的是哪个，到时候发现hashCode都一样，这不是完犊子嘛。</p>
+<hr>
+<blockquote>
+<p>可以可以小伙子，我记得你上面说过他是线程不安全的，那你能跟我聊聊你们是怎么处理HashMap在线程安全的场景么？</p>
+</blockquote>
+<p>面试官，在这样的场景，我们一般都会使用<strong>HashTable</strong>或者<strong>CurrentHashMap</strong>，但是因为前者的<strong>并发度</strong>的原因基本上没啥使用场景了，所以存在线程不安全的场景我们都使用的是CorruentHashMap。</p>
+<p>HashTable我看过他的源码，很简单粗暴，直接在方法上锁，并发度很低，最多同时允许一个线程访问，currentHashMap就好很多了，1.7和1.8有较大的不同，不过并发度都比前者好太多了。</p>
+<p>源码在此：(部分)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> V <span class="title">put</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Make sure the value is not null</span></span><br><span class="line">        <span class="keyword">if</span> (value == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="最后总结"><a href="#最后总结" class="headerlink" title="最后总结"></a>最后总结</h2><p>HashMap常见面试题：</p>
+<ul>
+<li>HashMap的底层数据结构？</li>
+<li>HashMap的存取原理？</li>
+<li>Java7和Java8的区别？</li>
+<li>为啥会线程不安全？</li>
+<li>有什么线程安全的类代替么?</li>
+<li>默认初始化大小是多少？为啥是这么多？为啥大小都是2的幂？</li>
+<li>HashMap的扩容方式？负载因子是多少？为什是这么多？</li>
+<li>HashMap的主要参数都有哪些？</li>
+<li>HashMap是怎么处理hash碰撞的？</li>
+<li>hash的计算规则？</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://github.com/liqiang1127/2020/06/09/HashMap/" data-id="ckb7wchuh00007oug3dgw9dhk" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Mysql和Redis双写一致性" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2020/06/06/Mysql%E5%92%8CRedis%E5%8F%8C%E5%86%99%E4%B8%80%E8%87%B4%E6%80%A7/" class="article-date">
@@ -822,85 +1002,6 @@
 
 
   
-    <article id="post-factoryBean和beanFactory" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2020/05/14/factoryBean%E5%92%8CbeanFactory/" class="article-date">
-  <time datetime="2020-05-14T06:17:34.000Z" itemprop="datePublished">2020-05-14</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/05/14/factoryBean%E5%92%8CbeanFactory/">factoryBean和beanFactory</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>原文出处：<a href="https://zhuanlan.zhihu.com/p/87382038" target="_blank" rel="noopener">Spring中BeanFactory与FactoryBean的区别，你知道吗？</a></p>
-</blockquote>
-<p>在Spring中有BeanFactory和FactoryBean这2个接口，从名字来看很相似，比较容易搞混。</p>
-<h2 id="一、BeanFactory"><a href="#一、BeanFactory" class="headerlink" title="一、BeanFactory"></a>一、BeanFactory</h2><p><code>BeanFactory</code>是一个接口，它是Spring中工厂的顶层规范，是SpringIoc容器的核心接口，它定义了<code>getBean()</code>、<code>containsBean()</code>等管理Bean的通用方法。Spring的容器都是它的具体实现如：</p>
-<ul>
-<li>DefaultListableBeanFactory</li>
-<li>XmlBeanFactory</li>
-<li>ApplicationContext</li>
-</ul>
-<p>这些实现类又从不同的维度分别有不同的扩展。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">BeanFactory</span> </span>&#123;</span><br><span class="line">	<span class="comment">//对FactoryBean的转义定义，因为如果使用bean的名字检索FactoryBean得到的对象是工厂生成的对象，</span></span><br><span class="line">	<span class="comment">//如果需要得到工厂本身，需要转义</span></span><br><span class="line">	String FACTORY_BEAN_PREFIX = <span class="string">"&amp;"</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//根据bean的名字，获取在IOC容器中得到bean实例</span></span><br><span class="line">	<span class="function">Object <span class="title">getBean</span><span class="params">(String name)</span> <span class="keyword">throws</span> BeansException</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//根据bean的名字和Class类型来得到bean实例，增加了类型安全验证机制。</span></span><br><span class="line">	&lt;T&gt; <span class="function">T <span class="title">getBean</span><span class="params">(String name, @Nullable Class&lt;T&gt; requiredType)</span> <span class="keyword">throws</span> BeansException</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function">Object <span class="title">getBean</span><span class="params">(String name, Object... args)</span> <span class="keyword">throws</span> BeansException</span>;</span><br><span class="line"></span><br><span class="line">	&lt;T&gt; <span class="function">T <span class="title">getBean</span><span class="params">(Class&lt;T&gt; requiredType)</span> <span class="keyword">throws</span> BeansException</span>;</span><br><span class="line"></span><br><span class="line">	&lt;T&gt; <span class="function">T <span class="title">getBean</span><span class="params">(Class&lt;T&gt; requiredType, Object... args)</span> <span class="keyword">throws</span> BeansException</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//提供对bean的检索，看看是否在IOC容器有这个名字的bean</span></span><br><span class="line">	<span class="function"><span class="keyword">boolean</span> <span class="title">containsBean</span><span class="params">(String name)</span></span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//根据bean名字得到bean实例，并同时判断这个bean是不是单例</span></span><br><span class="line">	<span class="function"><span class="keyword">boolean</span> <span class="title">isSingleton</span><span class="params">(String name)</span> <span class="keyword">throws</span> NoSuchBeanDefinitionException</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">boolean</span> <span class="title">isPrototype</span><span class="params">(String name)</span> <span class="keyword">throws</span> NoSuchBeanDefinitionException</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">boolean</span> <span class="title">isTypeMatch</span><span class="params">(String name, ResolvableType typeToMatch)</span> <span class="keyword">throws</span> NoSuchBeanDefinitionException</span>;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">boolean</span> <span class="title">isTypeMatch</span><span class="params">(String name, @Nullable Class&lt;?&gt; typeToMatch)</span> <span class="keyword">throws</span> NoSuchBeanDefinitionException</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//得到bean实例的Class类型</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	Class&lt;?&gt; getType(String name) <span class="keyword">throws</span> NoSuchBeanDefinitionException;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//得到bean的别名，如果根据别名检索，那么其原名也会被检索出来</span></span><br><span class="line">	String[] getAliases(String name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="1-2-使用场景"><a href="#1-2-使用场景" class="headerlink" title="1.2 使用场景"></a>1.2 使用场景</h3><ul>
-<li>从Ioc容器中获取Bean(byName or byType)</li>
-<li>检索Ioc容器中是否包含指定的Bean</li>
-<li>判断Bean是否为单例</li>
-</ul>
-<h2 id="二、FactoryBean"><a href="#二、FactoryBean" class="headerlink" title="二、FactoryBean"></a>二、FactoryBean</h2><p>首先它是一个Bean，但又不仅仅是一个Bean。它是一个能生产或修饰对象生成的工厂Bean，类似于设计模式中的工厂模式和装饰器模式。它能在需要的时候生产一个对象，且不仅仅限于它自身，它能返回任何Bean的实例。</p>
-<h3 id="2-1-源码"><a href="#2-1-源码" class="headerlink" title="2.1 源码"></a>2.1 源码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">FactoryBean</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">	<span class="comment">//从工厂中获取bean</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function">T <span class="title">getObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">	<span class="comment">//获取Bean工厂创建的对象的类型</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	Class&lt;?&gt; getObjectType();</span><br><span class="line">	<span class="comment">//Bean工厂创建的对象是否是单例模式</span></span><br><span class="line">	<span class="function"><span class="keyword">default</span> <span class="keyword">boolean</span> <span class="title">isSingleton</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>从它定义的接口可以看出，<code>FactoryBean</code>表现的是一个工厂的职责。 <strong>即一个Bean A如果实现了FactoryBean接口，那么A就变成了一个工厂，根据A的名称获取到的实际上是工厂调用<code>getObject()</code>返回的对象，而不是A本身，如果要获取工厂A自身的实例，那么需要在名称前面加上’<code>&amp;</code>‘符号。</strong></p>
-<ul>
-<li>getObject(‘name’)返回工厂中的实例</li>
-<li>getObject(‘&amp;name’)返回工厂本身的实例</li>
-</ul>
-<p>通常情况下，bean 无须自己实现工厂模式，Spring 容器担任了工厂的 角色；但少数情况下，容器中的 bean 本身就是工厂，作用是产生其他 bean 实例。由工厂 bean 产生的其他 bean 实例，不再由 Spring 容器产生，因此与普通 bean 的配置不同，不再需要提供 class 元素。</p>
-<h3 id="2-2-示例"><a href="#2-2-示例" class="headerlink" title="2.2 示例"></a>2.2 示例</h3><p>先定义一个Bean实现FactoryBean接口</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyBean</span> <span class="keyword">implements</span> <span class="title">FactoryBean</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String message;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyBean</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.message = <span class="string">"通过构造方法初始化实例"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">// 这里并不一定要返回MyBean自身的实例，可以是其他任何对象的实例。</span></span><br><span class="line">        <span class="comment">//如return new Student()...</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> MyBean(<span class="string">"通过FactoryBean.getObject()创建实例"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Class&lt;?&gt; getObjectType() &#123;</span><br><span class="line">        <span class="keyword">return</span> MyBean<span class="class">.<span class="keyword">class</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> message;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>MyBean实现了FactoryBean接口的两个方法，getObject()是可以返回任何对象的实例的，这里测试就返回MyBean自身实例，且返回前给message字段赋值。同时在构造方法中也为message赋值。然后测试代码中先通过名称获取Bean实例，打印message的内容，再通过<code>&amp;+名称</code>获取实例并打印message内容。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RunWith</span>(SpringRunner<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">@<span class="title">SpringBootTest</span>(<span class="title">classes</span> </span>= TestApplication<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">class</span> <span class="title">FactoryBeanTest</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> ApplicationContext context;</span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        MyBean myBean1 = (MyBean) context.getBean(<span class="string">"myBean"</span>);</span><br><span class="line">        System.out.println(<span class="string">"myBean1 = "</span> + myBean1.getMessage());</span><br><span class="line">        MyBean myBean2 = (MyBean) context.getBean(<span class="string">"&amp;myBean"</span>);</span><br><span class="line">        System.out.println(<span class="string">"myBean2 = "</span> + myBean2.getMessage());</span><br><span class="line">        System.out.println(<span class="string">"myBean1.equals(myBean2) = "</span> + myBean1.equals(myBean2));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">myBean1 = 通过FactoryBean.getObject()初始化实例</span><br><span class="line">myBean2 = 通过构造方法初始化实例</span><br><span class="line">myBean1.equals(myBean2) = <span class="keyword">false</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-3-使用场景"><a href="#2-3-使用场景" class="headerlink" title="2.3 使用场景"></a>2.3 使用场景</h3><p>说了这么多，为什么要有<code>FactoryBean</code>这个东西呢，有什么具体的作用吗？<br>FactoryBean在Spring中最为典型的一个应用就是用来<strong>创建AOP的代理对象</strong>。</p>
-<p>我们知道AOP实际上是Spring在运行时创建了一个代理对象，也就是说这个对象，是我们在运行时创建的，而不是一开始就定义好的，这很符合工厂方法模式。更形象地说，AOP代理对象通过Java的反射机制，在运行时创建了一个代理对象，在代理对象的目标方法中根据业务要求织入了相应的方法。这个对象在Spring中就是——<code>ProxyFactoryBean</code>。</p>
-<p>所以，FactoryBean为我们实例化Bean提供了一个更为灵活的方式，我们可以通过FactoryBean创建出更为复杂的Bean实例。</p>
-<h2 id="三、区别"><a href="#三、区别" class="headerlink" title="三、区别"></a>三、区别</h2><ul>
-<li>他们两个都是个工厂，但<code>FactoryBean</code>本质上还是一个Bean，也归<code>BeanFactory</code>管理</li>
-<li><code>BeanFactory</code>是Spring容器的顶层接口，<code>FactoryBean</code>更类似于用户自定义的工厂接口。</li>
-</ul>
-<h2 id="四、总结"><a href="#四、总结" class="headerlink" title="四、总结"></a>四、总结</h2><p><code>BeanFactory</code>与<code>FactoryBean</code>的区别确实容易混淆，死记硬背是不行的，最好还是从源码层面，置于spring的环境中去理解。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://github.com/liqiang1127/2020/05/14/factoryBean%E5%92%8CbeanFactory/" data-id="cka6efimo0000k4ughenp092e" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring/" rel="tag">Spring</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 
   <nav id="page-nav">
@@ -929,7 +1030,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/JVM/" style="font-size: 16px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 12px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 16px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 14px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 14px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 14px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 12px;">设计模式</a>
+      <a href="/tags/JVM/" style="font-size: 16.67px;">JVM</a> <a href="/tags/LeetCode/" style="font-size: 18.33px;">LeetCode</a> <a href="/tags/Linux/" style="font-size: 11.67px;">Linux</a> <a href="/tags/Mybatis/" style="font-size: 10px;">Mybatis</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/mysql/" style="font-size: 20px;">mysql</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B/" style="font-size: 13.33px;">并发编程</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.33px;">数据结构</a> <a href="/tags/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/" style="font-size: 13.33px;">网络通信</a> <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" style="font-size: 11.67px;">设计模式</a>
     </div>
   </div>
 
@@ -938,7 +1039,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">July 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li></ul>
     </div>
   </div>
 
@@ -949,6 +1050,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/">JVM面试题</a>
+          </li>
         
           <li>
             <a href="/2020/06/28/%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E8%AE%A1%E4%B8%89%E8%8C%83%E5%BC%8F/">数据库设计三范式</a>
@@ -964,10 +1069,6 @@
         
           <li>
             <a href="/2020/06/22/synchronized%E5%92%8CLock%E5%AD%B0%E4%BC%98%E5%AD%B0%E5%8A%A3%EF%BC%8C%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%EF%BC%9F/">synchronized和Lock孰优孰劣，如何选择？</a>
-          </li>
-        
-          <li>
-            <a href="/2020/06/19/%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E5%81%9C%E6%AD%A2%E7%BA%BF%E7%A8%8B%EF%BC%9F%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8volatile%E6%A0%87%E8%AE%B0%E4%BD%8D%E7%9A%84%E6%96%B9%E6%B3%95%E6%98%AF%E9%94%99%E8%AF%AF%E7%9A%84%EF%BC%9F/">如何正确停止线程？为什么用volatile标记位的方法是错误的？</a>
           </li>
         
       </ul>
