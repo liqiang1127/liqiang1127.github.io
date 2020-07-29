@@ -110,21 +110,19 @@
 <h3 id="年轻代提升阈值动态计算的描述"><a href="#年轻代提升阈值动态计算的描述" class="headerlink" title="年轻代提升阈值动态计算的描述"></a>年轻代提升阈值动态计算的描述</h3><p>程序从年龄最小的对象开始累加，如果累加的对象大小，大于幸存区的一半，则将当前的对象 age 作为新的阈值，年龄大于此阈值的对象则直接进入老年代。</p>
 <p>这里说的一半，是通过 TargetSurvivorRatio 参数进行设置的。</p>
 <h3 id="永久代"><a href="#永久代" class="headerlink" title="永久代"></a>永久代</h3><p>虽然课程一直在强调，是基于 Java 8+ 版本进行讲解的，但还是有读者提到了永久代。这部分知识容易发生混淆，面试频率也很高，建议集中消化一下。</p>
-<img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s1.png" class title="ss">![s1](.\JVM面试题\s1.png)
+<img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s1.png" class title="ss">
 
 <p>上面是第 02 课时中的一张图，注意左半部分是 Java 8 版本之前的内存区域，右半部分是 Java 8 的内存区域，主要区别就在 Perm 区和 Metaspace 区。</p>
 <p>Perm 区属于堆，独立控制大小，在 Java 8 中被移除了（JEP122），原来的方法区就在这里；Metaspace 是非堆，默认空间无上限，方法区移动到了这里。</p>
 <h2 id="常见面试题"><a href="#常见面试题" class="headerlink" title="常见面试题"></a>常见面试题</h2><h3 id="JVM-有哪些内存区域？（JVM-的内存布局是什么？"><a href="#JVM-有哪些内存区域？（JVM-的内存布局是什么？" class="headerlink" title="JVM 有哪些内存区域？（JVM 的内存布局是什么？)"></a>JVM 有哪些内存区域？（JVM 的内存布局是什么？)</h3><p>JVM 包含堆、元空间、Java 虚拟机栈、本地方法栈、程序计数器等内存区域，其中，堆是占用内存最大的一块，如下图所示。</p>
 <img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s2.jpg" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5Cs2.jpg" alt="s2"></p>
 <h3 id="Java-的内存模型是什么？（JMM-是什么？）"><a href="#Java-的内存模型是什么？（JMM-是什么？）" class="headerlink" title="Java 的内存模型是什么？（JMM 是什么？）"></a>Java 的内存模型是什么？（JMM 是什么？）</h3><p>JVM 试图定义一种统一的内存模型，能将各种底层硬件以及操作系统的内存访问差异进行封装，使 Java 程序在不同硬件以及操作系统上都能达到相同的并发效果。它分为工作内存和主内存，线程无法对主存储器直接进行操作，如果一个线程要和另外一个线程通信，那么只能通过主存进行交换，如下图所示。</p>
-<img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s3.png" class title="ss">![s3](.\JVM面试题\s3.png)
+<img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s3.png" class title="ss">
 
 <h3 id="JVM-垃圾回收时如何确定垃圾？什么是-GC-Roots？"><a href="#JVM-垃圾回收时如何确定垃圾？什么是-GC-Roots？" class="headerlink" title="JVM 垃圾回收时如何确定垃圾？什么是 GC Roots？"></a>JVM 垃圾回收时如何确定垃圾？什么是 GC Roots？</h3><p>JVM 采用的是可达性分析算法。JVM 是通过 GC Roots 来判定对象存活的，从 GC Roots 向下追溯、搜索，会产生一个叫做 Reference Chain 的链条。当一个对象不能和任何一个 GC Root 产生关系时，就判定为垃圾，如下图所示。</p>
 <img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s4.png" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5Cs4.png" alt="s4"></p>
 <p>GC Roots 大体包括：</p>
 <ul>
 <li><p>活动线程相关的各种引用，比如虚拟机栈中 栈帧里的引用；</p>
@@ -147,7 +145,6 @@
 <h3 id="GC-垃圾回收算法与垃圾收集器的关系？"><a href="#GC-垃圾回收算法与垃圾收集器的关系？" class="headerlink" title="GC 垃圾回收算法与垃圾收集器的关系？"></a>GC 垃圾回收算法与垃圾收集器的关系？</h3><p>常用的垃圾回收算法有标记清除、标记整理、复制算法等，引用计数器也算是一种，但垃圾回收器不使用这种算法，因为有循环依赖的问题。</p>
 <img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s5.jpg" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5Cs5.jpg" alt="s5"></p>
 <p>很多垃圾回收器都是分代回收的：</p>
 <ul>
 <li><p>对于年轻代，主要有 Serial、ParNew 等垃圾回收器，回收过程主要使用复制算法；</p>
@@ -156,7 +153,7 @@
 </li>
 </ul>
 <p>我们线上使用较多的是 G1，也有年轻代和老年代的概念，不过它是一个整堆回收器，它的回收对象是小堆区 。</p>
-<h3 id="生产上如何配置垃圾收集器？"><a href="#生产上如何配置垃圾收集器？" class="headerlink" title="生产上如何配置垃圾收集器？"></a>生产上如何配置垃圾收集器？</h3><img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s6.png" class title="ss">![s6](.\JVM面试题\s6.png)
+<h3 id="生产上如何配置垃圾收集器？"><a href="#生产上如何配置垃圾收集器？" class="headerlink" title="生产上如何配置垃圾收集器？"></a>生产上如何配置垃圾收集器？</h3><img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s6.png" class title="ss">
 
 <p>首先是内存大小问题，基本上每一个内存区域我都会设置一个上限，来避免溢出问题，比如元空间。通常，堆空间我会设置成操作系统的 2/3，超过 8GB 的堆，优先选用 G1。</p>
 <p>然后我会对 JVM 进行初步优化，比如根据老年代的对象提升速度，来调整年轻代和老年代之间的比例。</p>
@@ -165,7 +162,6 @@
 <h3 id="怎么查看服务器默认的垃圾回收器是哪一个？"><a href="#怎么查看服务器默认的垃圾回收器是哪一个？" class="headerlink" title="怎么查看服务器默认的垃圾回收器是哪一个？"></a>怎么查看服务器默认的垃圾回收器是哪一个？</h3><p>这通常会使用另外一个参数，即 -XX:+PrintCommandLineFlags，来打印所有的参数，包括使用的垃圾回收器。</p>
 <h3 id="假如生产环境-CPU-占用过高，请谈谈你的分析思路和定位。"><a href="#假如生产环境-CPU-占用过高，请谈谈你的分析思路和定位。" class="headerlink" title="假如生产环境 CPU 占用过高，请谈谈你的分析思路和定位。"></a>假如生产环境 CPU 占用过高，请谈谈你的分析思路和定位。</h3><img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s7.jpg" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5Cs7.jpg" alt="s7"></p>
 <p>首先，使用 top -H 命令获取占用 CPU 最高的线程，并将它转化为十六进制。</p>
 <p>然后，使用 jstack 命令获取应用的栈信息，搜索这个十六进制，这样就能够方便地找到引起 CPU 占用过高的具体原因。</p>
 <h3 id="对于-JDK-自带的监控和性能分析工具用过哪些？"><a href="#对于-JDK-自带的监控和性能分析工具用过哪些？" class="headerlink" title="对于 JDK 自带的监控和性能分析工具用过哪些？"></a>对于 JDK 自带的监控和性能分析工具用过哪些？</h3><ul>
@@ -183,12 +179,10 @@
 <h3 id="栈帧都有哪些数据？"><a href="#栈帧都有哪些数据？" class="headerlink" title="栈帧都有哪些数据？"></a>栈帧都有哪些数据？</h3><p>栈帧包含：局部变量表、操作数栈、动态连接、返回地址等。</p>
 <img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s8.jpg" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5Cs8.jpg" alt="s8"></p>
 <h3 id="JIT-是什么？"><a href="#JIT-是什么？" class="headerlink" title="JIT 是什么？"></a>JIT 是什么？</h3><p>为了提高热点代码的执行效率，在运行时，虚拟机将会把这些代码编译成与本地平台相关的机器码，并进行各种层次的优化，完成这个任务的编译器，就称为即时编译器（Just In Time Compiler），简称 JIT 编译器。</p>
 <h3 id="Java-的双亲委托机制是什么？"><a href="#Java-的双亲委托机制是什么？" class="headerlink" title="Java 的双亲委托机制是什么？"></a>Java 的双亲委托机制是什么？</h3><p>双亲委托的意思是，除了顶层的启动类加载器以外，其余的类加载器，在加载之前，都会委派给它的父加载器进行加载，这样一层层向上传递，直到祖先们都无法胜任，它才会真正的加载，Java 默认是这种行为。</p>
 <img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s9.png" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5Cs9.png" alt="s9"></p>
 <h3 id="有哪些打破了双亲委托机制的案例？"><a href="#有哪些打破了双亲委托机制的案例？" class="headerlink" title="有哪些打破了双亲委托机制的案例？"></a>有哪些打破了双亲委托机制的案例？</h3><ul>
 <li><p>Tomcat 可以加载自己目录下的 class 文件，并不会传递给父类的加载器；</p>
 </li>
@@ -197,7 +191,6 @@
 </ul>
 <h3 id="简单描述一下（分代）垃圾回收的过程"><a href="#简单描述一下（分代）垃圾回收的过程" class="headerlink" title="简单描述一下（分代）垃圾回收的过程"></a>简单描述一下（分代）垃圾回收的过程</h3><img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/s10.jpg" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5Cs10.jpg" alt="s10"></p>
 <p>分代回收器有两个分区：老生代和新生代，新生代默认的空间占总空间的 1/3，老生代的默认占比是 2/3。</p>
 <p>新生代使用的是复制算法，新生代里有 3 个分区：Eden、To Survivor、From Survivor，它们的默认占比是 8:1:1。</p>
 <p>当年轻代中的 Eden 区分配满的时候，就会触发年轻代的 GC（Minor GC），具体过程如下：</p>
@@ -231,7 +224,6 @@
 </ul>
 <h3 id="你使用过-G1-垃圾回收器的哪几个重要参数？"><a href="#你使用过-G1-垃圾回收器的哪几个重要参数？" class="headerlink" title="你使用过 G1 垃圾回收器的哪几个重要参数？"></a>你使用过 G1 垃圾回收器的哪几个重要参数？</h3>
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5C11.jpg" alt="11"></p>
 <p>最重要的是 MaxGCPauseMillis，可以通过它设定 G1 的目标停顿时间，它会尽量去达成这个目标。G1HeapRegionSize 可以设置小堆区的大小，一般是 2 的次幂。InitiatingHeapOccupancyPercent 启动并发 GC 时的堆内存占用百分比，G1 用它来触发并发 GC 周期，基于整个堆的使用率，而不只是某一代内存的使用比例，默认是 45%。</p>
 <h3 id="GC-日志的-real、user、sys-是什么意思？"><a href="#GC-日志的-real、user、sys-是什么意思？" class="headerlink" title="GC 日志的 real、user、sys 是什么意思？"></a>GC 日志的 real、user、sys 是什么意思？</h3><ul>
 <li><p>real 指的是从开始到结束所花费的时间，比如进程在等待 I/O 完成，这个阻塞时间也会被计算在内。</p>
@@ -248,8 +240,6 @@
 <p> 使用 gdb 命令可以将物理内存 dump 下来，通常能看到里面的内容。更加复杂的分析可以使用 Perf 工具，或者谷歌开源的 GPerftools。那些申请内存最多的 native 函数，就很容易找到。</p>
 <h3 id="HashMap-中的-key，可以是普通对象么？有什么需要注意的地方？"><a href="#HashMap-中的-key，可以是普通对象么？有什么需要注意的地方？" class="headerlink" title="HashMap 中的 key，可以是普通对象么？有什么需要注意的地方？"></a>HashMap 中的 key，可以是普通对象么？有什么需要注意的地方？</h3><p>Map 的 key 和 value 可以是任何类型，但要注意的是，一定要重写它的 equals 和 hashCode 方法，否则容易发生内存泄漏。</p>
 <h3 id="怎么看死锁的线程？"><a href="#怎么看死锁的线程？" class="headerlink" title="怎么看死锁的线程？"></a>怎么看死锁的线程？</h3><p>通过 jstack 命令，可以获得线程的栈信息，死锁信息会在非常明显的位置（一般是最后）进行提示。</p>
-<h3 id="如何写一段简单的死锁代码？"><a href="#如何写一段简单的死锁代码？" class="headerlink" title="如何写一段简单的死锁代码？"></a>如何写一段简单的死锁代码？</h3><p>详情请见第 15 课时的 DeadLockDemo，笔试的话频率也很高。</p>
-<h3 id="invokedynamic-指令是干什么的？"><a href="#invokedynamic-指令是干什么的？" class="headerlink" title="invokedynamic 指令是干什么的？"></a>invokedynamic 指令是干什么的？</h3><p>invokedynamic 是 Java 7 版本之后新加入的字节码指令，使用它可以实现一些动态类型语言的功能。我们使用的 Lambda 表达式，在字节码上就是 invokedynamic 指令实现的，它的功能有点类似反射，但它是使用方法句柄实现的，执行效率更高。</p>
 <h3 id="volatile-关键字的原理是什么？有什么作用？"><a href="#volatile-关键字的原理是什么？有什么作用？" class="headerlink" title="volatile 关键字的原理是什么？有什么作用？"></a>volatile 关键字的原理是什么？有什么作用？</h3><p>使用了 volatile 关键字的变量，每当变量的值有变动的时候，都会将更改立即同步到主内存中；而如果某个线程想要使用这个变量，就先要从主存中刷新到工作内存，这样就确保了变量的可见性。</p>
 <p>一般使用一个 volatile 修饰的 bool 变量，来控制线程的运行状态。</p>
 <h3 id="什么是方法内联？"><a href="#什么是方法内联？" class="headerlink" title="什么是方法内联？"></a>什么是方法内联？</h3><p>为了减少方法调用的开销，可以把一些短小的方法，比如 getter/setter，纳入到目标方法的调用范围之内，这样就少了一次方法调用，速度就能得到提升，这就是方法内联的概念。</p>
@@ -266,27 +256,16 @@
 </ul>
 <img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/12.jpg" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5C12.jpg" alt="12"></p>
 <h3 id="safepoint-是什么？"><a href="#safepoint-是什么？" class="headerlink" title="safepoint 是什么？"></a>safepoint 是什么？</h3><p>当发生 GC 时，用户线程必须全部停下来，才可以进行垃圾回收，这个状态我们可以认为 JVM 是安全的（safe），整个堆的状态是稳定的。</p>
 <img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/13.jpg" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5C13.jpg" alt="13"></p>
 <p>如果在 GC 前，有线程迟迟进入不了 safepoint，那么整个 JVM 都在等待这个阻塞的线程，造成了整体 GC 的时间变长。</p>
 <h3 id="MinorGC、MajorGC、FullGC-都什么时候发生？"><a href="#MinorGC、MajorGC、FullGC-都什么时候发生？" class="headerlink" title="MinorGC、MajorGC、FullGC 都什么时候发生？"></a>MinorGC、MajorGC、FullGC 都什么时候发生？</h3><p>MinorGC 在年轻代空间不足的时候发生，MajorGC 指的是老年代的 GC，出现 MajorGC 一般经常伴有 MinorGC。</p>
 <p>FullGC 有三种情况：第一，当老年代无法再分配内存的时候；第二，元空间不足的时候；第三，显示调用 System.gc 的时候。另外，像 CMS 一类的垃圾回收器，在 MinorGC 出现 promotion failure 的时候也会发生 FullGC。</p>
 <h3 id="类加载有几个过程？"><a href="#类加载有几个过程？" class="headerlink" title="类加载有几个过程？"></a>类加载有几个过程？</h3><p>加载、验证、准备、解析、初始化。</p>
 <img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/14.png" class title="ss">
 
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5C14.png" alt="14"></p>
 <h3 id="什么情况下会发生栈溢出？"><a href="#什么情况下会发生栈溢出？" class="headerlink" title="什么情况下会发生栈溢出？"></a>什么情况下会发生栈溢出？</h3><p>栈的大小可以通过 -Xss 参数进行设置，当递归层次太深的时候，则会发生栈溢出。</p>
-<h3 id="生产环境服务器变慢，请谈谈诊断思路和性能评估？"><a href="#生产环境服务器变慢，请谈谈诊断思路和性能评估？" class="headerlink" title="生产环境服务器变慢，请谈谈诊断思路和性能评估？"></a>生产环境服务器变慢，请谈谈诊断思路和性能评估？</h3><p>希望第 11 课时和第 16 课时中的一些思路，能够祝你一臂之力。下图是第 11 课时的一张影响因素的全景图。</p>
-<img src="/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/15.jpg" class title="ss">
-
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5C15.jpg" alt="15"></p>
-<p>从各个层次分析代码优化的手段，如下图所示：</p>
-
-
-<p><img src="/liqiang1127/2020/07/24/JVM%E9%9D%A2%E8%AF%95%E9%A2%98/.%5CJVM%E9%9D%A2%E8%AF%95%E9%A2%98%5C16.png" alt="16"></p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本课时我们首先修正了一些表述错误的知识点；然后分析了一些常见的面试题，这些面试题的覆盖率是非常有限的，因为很多细节都没有触及到，更多的面试题还需要你自行提取、整理，由于篇幅有限，这里不再重复。</p>
 <p>到现在为止，我们的课程内容就结束了。本课程的特色主要体现在实践方面，全部都是工作中的总结和思考；辅之以理论，给你一个在工作中，JVM 相关知识点的全貌。当然，有些课时的难度是比较高的，需要你真正的实际操作一下。</p>
 <p>写作的过程中难免会有遗漏的知识点，可通过拉勾客服人员加入本课程的读者群一起讨论；如果你觉得课程不错，从中有所收获的话，不要忘了推荐给身边的朋友哦。前路漫漫，一起加油。</p>
